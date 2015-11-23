@@ -48,7 +48,20 @@
 
     <title>A review of implementation DNS over port 80/443</title>
 
-
+    <author fullname="Shane Kerr" initials="S." surname="Kerr">
+      <organization>Beijing Internet Institute</organization>
+      <address>
+        <postal>
+          <street>2/F, Building 5, No.58 Jinghai Road, BDA</street>
+          <city>Beijing</city>
+          <code>100176</code>
+          <country>CN</country>
+        </postal>
+        <email>shane@biigroup.cn</email>
+        <uri>http://www.biigroup.com/</uri>
+      </address>
+    </author>
+    
     <author fullname="Linjian Song" initials="L." surname="Song">
       <organization>Beijing Internet Institute</organization>
       <address>
@@ -60,20 +73,6 @@
           <country>P. R. China</country>
         </postal>
         <email>songlinjian@gmail.com</email>
-        <uri>http://www.biigroup.com/</uri>
-      </address>
-    </author>
-
-    <author fullname="Shane Kerr" initials="S." surname="Kerr">
-      <organization>Beijing Internet Institute</organization>
-      <address>
-        <postal>
-          <street>2/F, Building 5, No.58 Jinghai Road, BDA</street>
-          <city>Beijing</city>
-          <code>100176</code>
-          <country>CN</country>
-        </postal>
-        <email>shane@biigroup.cn</email>
         <uri>http://www.biigroup.com/</uri>
       </address>
     </author>
