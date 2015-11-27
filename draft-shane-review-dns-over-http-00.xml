@@ -11,8 +11,9 @@
 <!ENTITY RFC3542 SYSTEM "http://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.3542.xml">
 <!ENTITY RFC5246 SYSTEM "http://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.5246.xml">
 <!ENTITY RFC5625 SYSTEM "http://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.5625.xml">
-<!ENTITY I-D.dnsop-cookies SYSTEM "http://xml2rfc.ietf.org/public/rfc/bibxml3/reference.I-D.draft-ietf-dnsop-cookies-02.xml">
-<!ENTITY I-D.dnsop-respsize SYSTEM "http://xml2rfc.ietf.org/public/rfc/bibxml3/reference.I-D.draft-ietf-dnsop-respsize-15.xml">
+<!ENTITY RFC5681 SYSTEM "http://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.5681.xml">
+<!ENTITY RFC6891 SYSTEM "http://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.6891.xml">
+<!ENTITY I-D.dprive-dns-over-tls SYSTEM "http://xml2rfc.ietf.org/public/rfc/bibxml3/reference.I-D.draft-ietf-dprive-dns-over-tls-01.xml">
 ]>
 <?xml-stylesheet type='text/xsl' href='rfc2629.xslt' ?>
 <!-- used by XSLT processors -->
@@ -105,7 +106,7 @@
     <abstract>
       <t>
         In order to work around the difficulty of upgrading DNS over UDP/53, 
-        there are various implementation of DNS over port 80/443 leveraging 、
+        there are various implementation of DNS over port 80/443 leveraging
         the merit of TCP/TLS/HTTP(s). This memo intends to review all possible 
         DNS implementations with references and hopefully deliver some useful 
         information for developers who want make their own DNS software.
@@ -190,7 +191,7 @@
       <section title="DNS OVER TLS on port 443">
 
         <t>Another approach is DNS over TLS on port 443 also implemented in DNSSEC trigger 
-          as an example. It is similar with [draft-ietf-dprive-dns-over-tls] which use a 
+          as an example. It is similar with <xref target="I-D.ietf-dprive-dns-over-tls"/> which use a 
           well-known port 853 instead. Using port 443 to carry the traffic still serve the 
           purpose in use case 1 in which some middle boxes may not recognized the 
           new port.</t>
@@ -260,8 +261,7 @@
 
         <t>In this implementation DNS data is exchange in other format than wire format, like 
           Json [draft-bortzmeyer-dns-json], or xml [draft-mohan-dns-query-xml]. There are also 
-          a bunch of REST DNS API developed by DNS SPs like [DYN-REST-API] .You can google for 
-          more.  </t>
+          a bunch of REST DNS API developed by DNS SPs like [DYN-REST-API] </t>
 
          <t>Most of these APIs are developed in the scope of their own system with different 
           specification. But the common and starting part is that a client will request a special formatted URI. Usually there is a HTTP(s) server listen to 80/443 will parse the request 
@@ -275,7 +275,7 @@
           usually do not contain RR records with the answer.</t>
     </section>
 
-</section>
+   </section>
 
     <section title="Open issues">
     	<t>Other Naming experiment  etc</t>
@@ -287,18 +287,9 @@
   <back>
 
     <references title="References">
-      &RFC1035;&RFC5625;&RFC5246;
-      &I-D.dnsop-cookies;&I-D.dnsop-respsize;
+      &RFC1035; &RFC5246; &RFC5625;
+      &I-D.dprive-dns-over-tls;
 
-    <reference anchor="Fragment-Poisonous">
-	            <front>
-	                <title>Fragmentation Considered Poisonous</title>
-			<author fullname="Herzberg, A."  initials="A." surname="Herzberg"></author>
-			<author fullname=" H. Shulman"  initials="H." surname="Shulman"></author>
-			<date year="2012" />            
-	            </front>
-	   </reference>
-     
      <reference anchor="DOTSE" target="http://www.iis.se/docs/Routertester_en.pdf">
 	        <front>
 	                <title>DNSSEC Tests of Consumer Broadband Routers</title>
@@ -327,14 +318,7 @@
       </front>
      </reference>
 
-      <reference anchor="DNS-over-TLS" target="https://datatracker.ietf.org/doc/draft-ietf-dprive-dns-over-tls/">
-          <front>
-                  <title>IETF DPRIVE WG</title>
-      <author ></author>
-      <date  />
-      </front>
-     </reference>
-       </references>
+   </references>
   </back>
 </rfc>
 
