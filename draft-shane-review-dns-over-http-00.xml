@@ -9,8 +9,8 @@
 <!ENTITY RFC1035 SYSTEM "http://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.1035.xml">
 <!ENTITY RFC1123 SYSTEM "http://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.1123.xml">
 <!ENTITY RFC3542 SYSTEM "http://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.3542.xml">
-<!ENTITY RFC5681 SYSTEM "http://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.5681.xml">
-<!ENTITY RFC6891 SYSTEM "http://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.6891.xml">
+<!ENTITY RFC5246 SYSTEM "http://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.5246.xml">
+<!ENTITY RFC5625 SYSTEM "http://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.5625.xml">
 <!ENTITY I-D.dnsop-cookies SYSTEM "http://xml2rfc.ietf.org/public/rfc/bibxml3/reference.I-D.draft-ietf-dnsop-cookies-02.xml">
 <!ENTITY I-D.dnsop-respsize SYSTEM "http://xml2rfc.ietf.org/public/rfc/bibxml3/reference.I-D.draft-ietf-dnsop-respsize-15.xml">
 ]>
@@ -48,20 +48,7 @@
 
     <title>A review of implementation DNS over port 80/443</title>
 
-    <author fullname="Shane Kerr" initials="S." surname="Kerr">
-      <organization>Beijing Internet Institute</organization>
-      <address>
-        <postal>
-          <street>2/F, Building 5, No.58 Jinghai Road, BDA</street>
-          <city>Beijing</city>
-          <code>100176</code>
-          <country>CN</country>
-        </postal>
-        <email>shane@biigroup.cn</email>
-        <uri>http://www.biigroup.com/</uri>
-      </address>
-    </author>
-    
+
     <author fullname="Linjian Song" initials="L." surname="Song">
       <organization>Beijing Internet Institute</organization>
       <address>
@@ -73,6 +60,20 @@
           <country>P. R. China</country>
         </postal>
         <email>songlinjian@gmail.com</email>
+        <uri>http://www.biigroup.com/</uri>
+      </address>
+    </author>
+
+    <author fullname="Shane Kerr" initials="S." surname="Kerr">
+      <organization>Beijing Internet Institute</organization>
+      <address>
+        <postal>
+          <street>2/F, Building 5, No.58 Jinghai Road, BDA</street>
+          <city>Beijing</city>
+          <code>100176</code>
+          <country>CN</country>
+        </postal>
+        <email>shane@biigroup.cn</email>
         <uri>http://www.biigroup.com/</uri>
       </address>
     </author>
@@ -92,7 +93,6 @@
       </address>
     </author>
 
-    <date/>
     <date/>
 
     <!-- Meta-data Declarations -->
@@ -119,7 +119,7 @@
 
     <section title="Introduction">
     
-    <t> RFC 1035<xref target="RFC1035">says the Internet support name server works on port 53 
+    <t> RFC 1035<xref target="RFC1035"/>says the Internet support name server works on port 53 
       using both UDP and TCP. Port 53 is the well-known port allocated by 
       IANA for DNS protocol. Any new extension of DNS protocol should 
       consider backward-compatibility and progress to upgrade both the existing system and 
@@ -132,7 +132,7 @@
     <t>Case 1: for enhancing the availability of DNS service, people disguise DNS 
       traffic into Web traffic using port 80/443 over TCP or HTTP. It can bypasses 
       firewall or other middle box on path which may jeopardize normal DNS 
-      traffic by misbehavior <xref target="RFC5625"> <xref target="DOTSE"> <xref target="SAC035">.</t>
+      traffic by misbehavior <xref target="RFC5625"/> <xref target="DOTSE"/> <xref target="SAC035"/>.</t>
 
     <t>Case 2: Based on good reachability of DNS, stub resolver can choose any reliable 
       and secure resolver as its cache server, other than cache server provisioned 
@@ -174,7 +174,7 @@
         except the transport Port is moved to port 80 or 443. The difference between port 
         80 and 443 might be that the traffic of port 80 is usually intercepted as HTTP traffic 
         while the traffic of port 443 is usually concerned to be encrypted. One example transporting 
-        DNS through port 80/443 is used by NLnetLabs as a feature of DNSSEC trigger <xref target="1">.</t> 
+        DNS through port 80/443 is used by NLnetLabs as a feature of DNSSEC trigger <xref target="dnssec-trigger"/>.</t> 
 
       <t>Transporting DNS through port 80/443 is an easy implementation. Developers can 
         simply runs a DNS server by making its DNS software also listen to port 80/443. 
@@ -198,7 +198,7 @@
           <t>&lt; &lt; Davey note: or we can just recommend developer to follow 
             draft-ietf-dprive-dns-over-tls but using port 443 &gt;&gt;</t>
 
-        <t>As specified in RFC 5246 <xref target="RFC5246">, both the DNS server 
+        <t>As specified in RFC 5246 <xref target="RFC5246"/>, both the DNS server 
           and client can be authenticated or not authenticated. The DNS service providers 
           can decide authenticated pattern on both server and client sides based on their 
           own requirement for security and privacy.</t>
@@ -260,8 +260,8 @@
 
         <t>In this implementation DNS data is exchange in other format than wire format, like 
           Json [draft-bortzmeyer-dns-json], or xml [draft-mohan-dns-query-xml]. There are also 
-          a bunch of REST DNS API developed by DNS SPs like [DYN-REST-API] << You can google for 
-          more. >> </t>
+          a bunch of REST DNS API developed by DNS SPs like [DYN-REST-API] .You can google for 
+          more.  </t>
 
          <t>Most of these APIs are developed in the scope of their own system with different 
           specification. But the common and starting part is that a client will request a special formatted URI. Usually there is a HTTP(s) server listen to 80/443 will parse the request 
@@ -275,7 +275,7 @@
           usually do not contain RR records with the answer.</t>
     </section>
 
-
+</section>
 
     <section title="Open issues">
     	<t>Other Naming experiment  etc</t>
@@ -287,7 +287,7 @@
   <back>
 
     <references title="References">
-      &RFC1035;&RFC5625;
+      &RFC1035;&RFC5625;&RFC5246;
       &I-D.dnsop-cookies;&I-D.dnsop-respsize;
 
     <reference anchor="Fragment-Poisonous">
@@ -317,11 +317,9 @@
                 <date year="2008" />
             </front>
      </reference>
-     </references>
 
-    <references title="Some URLs">
 
-      <reference anchor="1" target="https://www.nlnetlabs.nl/projects/dnssec-trigger/">
+      <reference anchor="dnssec-trigger" target="https://www.nlnetlabs.nl/projects/dnssec-trigger/">
           <front>
                   <title>DNSSEC Tests of Consumer Broadband Routers</title>
       <author ></author>
@@ -329,22 +327,14 @@
       </front>
      </reference>
 
-      <reference anchor="2" target="https://datatracker.ietf.org/doc/draft-ietf-dprive-dns-over-tls/">
+      <reference anchor="DNS-over-TLS" target="https://datatracker.ietf.org/doc/draft-ietf-dprive-dns-over-tls/">
           <front>
                   <title>IETF DPRIVE WG</title>
       <author ></author>
       <date  />
       </front>
      </reference>
-      <reference anchor="3" target="http://www.icann.org/committees/security/sac035.pdf">
-          <front>
-                  <title>IETF DPRIVE WG</title>
-      <author ></author>
-      <date  />
-      </front>
-     </reference>
-
-   </references>
+       </references>
   </back>
 </rfc>
 
