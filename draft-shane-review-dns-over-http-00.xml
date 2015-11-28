@@ -380,10 +380,6 @@
             </front>
      </reference>
 
-<<<<<<< HEAD
-
-=======
->>>>>>> e0c70d948e12d536eec0fa4baed28f1f2a95a21f
       <reference anchor="dnssec-trigger" target="https://www.nlnetlabs.nl/projects/dnssec-trigger/">
           <front>
                   <title>Dnssec-Trigger</title>
