@@ -288,7 +288,8 @@
     <t>
       Note that if the original DNS query is sent by TCP, first two
       bits of the package is the message length and should be removed.
-      There is an implementation of this methodology in golang
+      There is an implementation of this methodology in the Go
+      Programming Language
       (https://github.com/BII-Lab/DNSoverHTTPinGO) as well as C
       (https://github.com/BII-Lab/DNSoverHTTP), maintained by BII lab.
     </t>
