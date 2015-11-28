@@ -8,12 +8,16 @@
 
 <!ENTITY RFC1035 SYSTEM "http://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.1035.xml">
 <!ENTITY RFC1123 SYSTEM "http://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.1123.xml">
+<!ENTITY RFC3234 SYSTEM "http://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.3234.xml">
 <!ENTITY RFC3542 SYSTEM "http://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.3542.xml">
 <!ENTITY RFC5246 SYSTEM "http://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.5246.xml">
 <!ENTITY RFC5625 SYSTEM "http://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.5625.xml">
 <!ENTITY RFC5681 SYSTEM "http://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.5681.xml">
+<!ENTITY RFC5966 SYSTEM "http://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.5966.xml">
 <!ENTITY RFC6891 SYSTEM "http://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.6891.xml">
 <!ENTITY I-D.dprive-dns-over-tls SYSTEM "http://xml2rfc.ietf.org/public/rfc/bibxml3/reference.I-D.draft-ietf-dprive-dns-over-tls-01.xml">
+<!ENTITY I-D.bortzmeyer-dns-json SYSTEM "http://xml2rfc.ietf.org/public/rfc/bibxml3/reference.I-D.draft-bortzmeyer-dns-json-01.xml">
+<!ENTITY I-D.mohan-dns-query-xml SYSTEM "http://xml2rfc.ietf.org/public/rfc/bibxml3/reference.I-D.draft-mohan-dns-query-xml-00.xml">
 ]>
 <?xml-stylesheet type='text/xsl' href='rfc2629.xslt' ?>
 <!-- used by XSLT processors -->
@@ -100,15 +104,17 @@
     <area>Internet Area</area>
     <workgroup>Internet Engineering Task Force</workgroup>
 
-    <!-- <keyword>dns</keyword> -->
+    <keyword>dns</keyword>
+    <keyword>http</keyword>
 
     <abstract>
       <t>
-        In order to work around the difficulty of upgrading DNS over UDP/53, 
-        there are various implementation of DNS over port 80/443 leveraging
-        the merit of TCP/TLS/HTTP(s). This memo intends to review all possible 
-        DNS implementations with references and hopefully deliver some useful 
-        information for developers who want make their own DNS software.
+        The default DNS transport uses UDP on port 53. There are many
+        motivations why users or operators may prefer to avoid sending
+        DNS traffic in this way. A common solution is to use port 80
+        or 443; with plain TCP, TLS-encrypted TCP, or full HTTP(S).
+        This memo reviews the possible approaches and delivers some
+        useful information for developers.
       </t>
 
     </abstract>
@@ -117,164 +123,233 @@
 
   <middle>
 
-    <section title="Introduction">
+  <section title="Introduction">
     
-    <t> RFC 1035<xref target="RFC1035"/>says the Internet support name server works on port 53 
-      using both UDP and TCP. Port 53 is the well-known port allocated by 
-      IANA for DNS protocol. Any new extension of DNS protocol should 
-      consider backward-compatibility and progress to upgrade both the existing system and 
-      DNS specification suits. However, to avoid complexity of upgrading 
-      approach people now simply use different port, like 80/443 to implement 
-      DNS for new DNS protocol and operation practice. </t>
+    <t>
+      Name servers use port 53, on both UDP and TCP 
+      <xref target="RFC1035"/> <xref target="RFC5966"/>. However,
+      users or operators occasionally find it useful to use an
+      alternative way to deliver DNS information, and often pick port
+      80 (the default HTTP port) or 443 (the default HTTPS port) for
+      this purpose.
+    </t>
 
-  <t>There are several use cases: </t>
-  <t> <list style="symbols">
-    <t>Case 1: for enhancing the availability of DNS service, people disguise DNS 
-      traffic into Web traffic using port 80/443 over TCP or HTTP. It can bypasses 
-      firewall or other middle box on path which may jeopardize normal DNS 
-      traffic by misbehavior <xref target="RFC5625"/> <xref target="DOTSE"/> <xref target="SAC035"/>.</t>
+    <t>There are several use cases:</t>
+    <t><list style="numbers">
+      <t>
+        Firewalls or other middleboxes may interfere with normal DNS
+        traffic <xref target="RFC3234"/> <xref target="RFC5625"/>
+        <xref target="DOTSE"/> <xref target="SAC035"/>.
+      </t>
+      <t>
+        Clients may want to chose a resolver other than the one
+        locally available. For example, some ISPs and hotels perform
+        DNS rewriting to send users to advertising pages, or may use
+        IP addresses which cause misleading geographic location for
+        the user. Users may want DNSSEC support which is not deployed
+        locally, and so on.
+      </t>
+      <t>
+        Users may use DNS over TLS or HTTPS to protect privacy.
+      </t>
+      <t>
+        Developers may want a higher level DNS API. Web developers may
+        prefer different abstractions or familiar tools like JSON or
+        XML, transmitted using HTTP or HTTPS.
+      </t>
+    </list></t>
 
-    <t>Case 2: Based on good reachability of DNS, stub resolver can choose any reliable 
-      and secure resolver as its cache server, other than cache server provisioned 
-      by local ISP or small hotel. In some ISPs and hotels, Stub client usually 
-      complains and suffers from ad injection on web page, DNS hijack and even 
-      geographic misleading by centralized resolver distant from client.</t>
+    <t>
+      This memo does not aim to develop standards or tools. The
+      purpose is to review various implementation options as a
+      reference for developers. However, it may be helpful for anyone
+      hoping to develop specifications for DNS over 80/443 in the
+      future.
+    </t>
 
-    <t>Case 3:Using port 443, DNS over TLS/HTTPS provides encryption method to protect 
-      privacy.</t>
+    <t>
+      Note that most of the implementations described in this memo are
+      on port 80/443 and combined with TCP/TLS/HTTP(S). The main focus
+      is between stub resolvers and recursive servers, and the
+      discussion is about the stub resolver to recursive server
+      communication.
+    </t>
 
-    <t>Case 4: To provide a higher level DNS API for developer like web developer to 
-      access DNS information and new DNS features. In this case DNS data is exchanged 
-      using JSON, XML or other format which also relied the transmission of HTTP(s) 
-      on 80/443.</t>
+  </section> <!-- Introduction -->
 
-  </list></t>
+  <section title="Different Implementations Approaches">
 
-    <t>This memo is not aiming to develop tools or standard for above use cases. 
-      The purpose here is to provide a review by compare and list all possible 
-      implementation options for developing reference. If interest from anyone 
-      hoping to explore future research or specification of DNS over 80/443, 
-      hopefully this memo can help.</t>
+    <section title="DNS over TCP on port 80/443">
+    <t>
+      The simplest approach is just moving the DNS traffic to port 80
+      or 443 from 53. This approach serves the requirement use case 1.
+    </t>
 
-    <t>Noted that most of the implementations described in this memo is on port 
-      80/443 and combined with TCP/TLS/HTTP(s). And the main scenario focus between 
-      stub resolver and recursive server, so all the discussion after is only 
-      applicable in the side between client and resolvers.</t>
+    <t>
+      In this way, the whole protocol is the same as current DNS
+      transport in TCP, except the transport port is moved to port 80
+      or 443. The difference between port 80 and 443 is that the
+      traffic of port 80 is usually intercepted as HTTP traffic while
+      the traffic of port 443 is usually considered to be encrypted,
+      and typically ignored by middleboxes.  One example where
+      DNS is transported through port 80/443 is one of the fallback
+      cases of NLnetLabs' DNSSEC trigger 
+      <xref target="dnssec-trigger"/>.
+    </t> 
 
-    </section>
+    <t>
+      Transporting DNS through port 80/443 is an easy implementation.
+      Developers can simply run an existing DNS server and configure
+      the DNS software to listen on ports 80/443.  The client can also
+      apply this change without any significant changes.
+    </t>
 
-    <section title="Different implementations approaches">
+    <t>
+      One drawback of this approach is that it might mislead the
+      client because of the port used. For example, clients might
+      think DNS over 443 as a secure protocol because normally the
+      session would be encrypted. In this case, however, it is not.
+    </t>
+    </section> <!-- "DNS over TCP on port 80/443" -->
 
-      <section title="DNS over TCP on port 80/443">
-        
-      <t>One simplest approach might be straightly moving the DNS traffic to port 80 or 443 
-        from 53. This approach serve the requirement use case 1.</t>
+    <section title="DNS over TLS on port 443">
+    <t>
+      Another approach is DNS over TLS on port 443, which is also
+      implemented in DNSSEC trigger. It is similar to 
+      <xref target="I-D.ietf-dprive-dns-over-tls"/>, which uses the
+      well-known port 853. Using port 443 to carry the traffic still
+      serves the purpose in use case 1, as some middle boxes may block
+      traffic on the new port.
+    </t>
 
-       <t>In this way, the whole protocol is the same as current DNS transport in TCP 
-        except the transport Port is moved to port 80 or 443. The difference between port 
-        80 and 443 might be that the traffic of port 80 is usually intercepted as HTTP traffic 
-        while the traffic of port 443 is usually concerned to be encrypted. One example transporting 
-        DNS through port 80/443 is used by NLnetLabs as a feature of DNSSEC trigger <xref target="dnssec-trigger"/>.</t> 
+    <t>&lt;&lt; Note: or we can just recommend developer to follow 
+       draft-ietf-dprive-dns-over-tls but using port 443 &gt;&gt;</t>
 
-      <t>Transporting DNS through port 80/443 is an easy implementation. Developers can 
-        simply runs a DNS server by making its DNS software also listen to port 80/443. 
-        The client can also apply this change without any significant change.</t>
+    <t>
+      As specified in RFC 5246 <xref target="RFC5246"/>, both the DNS
+      server and client can be authenticated or not authenticated. The
+      DNS service providers can decide authenticated pattern on both
+      server and client sides based on their own requirement for
+      security and privacy.
+    </t>
 
-      <t>The drawback of this approach is that it might mislead the client by the port it 
-        used. For example, clients might think DNS over 443 as a private protocol because 
-        normally the session would be encrypted. In this case, however, it isn't. That 
-        might mislead some of the clients.</t>
-
-      </section>
-
-      <section title="DNS OVER TLS on port 443">
-
-        <t>Another approach is DNS over TLS on port 443 also implemented in DNSSEC trigger 
-          as an example. It is similar with <xref target="I-D.ietf-dprive-dns-over-tls"/> which use a 
-          well-known port 853 instead. Using port 443 to carry the traffic still serve the 
-          purpose in use case 1 in which some middle boxes may not recognized the 
-          new port.</t>
-
-          <t>&lt; &lt; Davey note: or we can just recommend developer to follow 
-            draft-ietf-dprive-dns-over-tls but using port 443 &gt;&gt;</t>
-
-        <t>As specified in RFC 5246 <xref target="RFC5246"/>, both the DNS server 
-          and client can be authenticated or not authenticated. The DNS service providers 
-          can decide authenticated pattern on both server and client sides based on their 
-          own requirement for security and privacy.</t>
-
-        <t>TLS provide many benefits for DNS. First, it significantly reduces DNS conversation’s
-         vulnerability of being hijacked. Second, it prevents resolvers from coming amplifier of 
-         reflection attack. Additionally, it provides privacy by encrypted the conversation 
-         between client and server. </t>
+    <t>
+      TLS provide many benefits for DNS. First, it significantly
+      reduces DNS conversation’s vulnerability of being hijacked.
+      Second, it prevents resolvers from coming amplifier of
+      reflection attack. Additionally, it provides privacy by
+      encrypted the conversation between client and server.
+    </t>
   
-        <t>One concern of DNS over TLS is its cost. Compared to UDP, DNS-over-TCP requires an 
-          additional round-trip-time (RTT) of latency to establish a TCP connection. Use of 
-          TLS encryption algorithms results in slightly higher CPU usage. It should also be considered that 
-          the DNS package over TLS on new port might be dropped by some middle boxes. Another 
-          concern of TLS is its deployment difficulty for authenticated server. If servers need 
-          to be authenticated, certificate management is needed.</t>
+    <t>
+      One concern of DNS over TLS is its cost. Compared to UDP,
+      DNS-over-TCP requires an additional round-trip-time (RTT) of
+      latency to establish a TCP connection. Use of TLS encryption
+      algorithms adds an additional RTT, and results in slightly
+      higher CPU usage. It should also be considered that the DNS
+      packet over TLS on a new port might be dropped by some middle
+      boxes. Another concern of TLS is the deployment difficulty when
+      authenticating the server. If servers are authenticated,
+      certificate management is required.
+    </t>
         
-      </section>
+    </section> <!-- "DNS over TLS on port 443" -->
 
-      <section title="DNS BINARY over HTTP(S)">
+    <section title="Wire-format DNS over HTTP(S)">
 
-         <t>Different from DNS over TCP on port 80/443, another option is encapsulating DNS 
-          content into HTTP’s body and send them as HTTP(s) traffic. It is quiet useful in 
-          use case 1&amp;2 described in introduction. This approach is that HTTP usually 
-          makes it through even the worst coffee shop or hotel room firewalls, since commerce 
-          may be at stake. We also benefit from HTTP's persistent TCP connection pool concept, 
-          which DNS on TCP/53 does not have. Lastly, HTTPS will work, giving privacy.  </t>
+    <t>
+      Different from DNS over TCP using port 80/443, another option is
+      encapsulating DNS content into an HTTP body and sending it as
+      HTTP(S) traffic. It is quiet useful in use cases 1 &amp; 2
+      described in the introduction. This approach has the benefit
+      that HTTP usually makes it through even the worst coffee shop or
+      hotel room firewalls, as this expected by Internet users. We
+      also benefit from HTTP's persistent TCP connection pool concept,
+      which DNS on TCP/53 does not have. Finally, as with DNS over
+      TLS, HTTPS provides data integrity and privacy.
+    </t>
 
-          <t>The basic methodology works as follow:</t>
-        <t>1. Client creates DNS query package.</t>
-        <t>2. Client encapsulates DNS package in HTTP(S) package’s body and assignes parameters 
-          in HTTP header.</t>
-        <t>3. Client sends the package to Server.</t>
-        <t>4. Server decapsulates HTTP package to DNS query and resolve it.</t>
-        <t>5. Server encapsulates DNS Package in HTTP(S) and sends it back.</t>
+    <t>The basic methodology works as follows:
+      <list style="numbers">
+        <t>The client creates a DNS query message.</t>
+        <t>The client encapsulates the DNS message in a HTTP(S)
+           message body and assigns parameters with the HTTP
+           header.</t>
+        <t>The client connects to the server and issues an HTTP(S)
+           POST request method.</t>
+        <t>The server decapsulates the HTTP package to DNS query, and
+           resolves the DNS query.</t>
+        <t>The server encapsulates the DNS response in HTTP(S) and
+           sends it back via the HTTP session.</t>
+      </list>
+    </t>
 
-        <t>Note that if the origin DNS query is sent by TCP, first two bits 
-          of the package is TCP link and should be removed. There is an implementation of this 
-          methodology in golang (https://github.com/BII-Lab/DNSoverHTTPinGO) as well as C
-          (https://github.com/BII-Lab/DNSoverHTTP) maintain by BII lab</t>
+    <t>
+      Note that if the original DNS query is sent by TCP, first two
+      bits of the package is the message length and should be removed.
+      There is an implementation of this methodology in golang
+      (https://github.com/BII-Lab/DNSoverHTTPinGO) as well as C
+      (https://github.com/BII-Lab/DNSoverHTTP), maintained by BII lab
+    </t>
 
-        <t>In addition to the benefits mentioned before, the HTTP header makes DNS BINARY 
-          HTTP(S) easy to extend. Comparing to creating a new option in EDNS0, using new 
-          parameters in HTTP header is easier to deploy, since DNS package with EDNS0 might 
-          not pass some middle boxes.</t>
+    <t>
+      In addition to the benefits mentioned before, the HTTP header
+      makes wire-format DNS over HTTP(S) easy to extend. Compared to
+      creating a new option in EDNS0, using new parameters in HTTP
+      header is far easier to deploy, since DNS messages with EDNS0
+      may not pass some middle boxes.
+    </t>
 
-        <t>The disadvantage of packaging DNS into HTTP might be its cost. Doing pack and unpack 
-          costs CPU and may result in higher response time. The DNS over HTTP package also has 
-          a risk of being dropped by some firewalls which intercepts HTTP packages. And it should 
-          be noted that if HTTPS is used here, then all the discussion of TLS in previous section 
-          is also applicable here.</t>
-      </section>
+    <t>
+      One disadvantage of packaging DNS into HTTP is its cost.  Doing
+      pack and unpack costs CPU and may result in higher response
+      time. The DNS over HTTP messages also has a risk of being
+      dropped by some firewalls which intercepts HTTP packets.  And it
+      should be noted that if HTTPS is used here, then all the
+      discussion of TLS in previous section is also applicable here.
+    </t>
+    </section> <!-- "Wire-format DNS over HTTP(S)" -->
 
+    <section title="REST HTTP API">
+    <t>
+      As mentioned in use case 4, one motivation of a REST HTTP API is
+      for web developers who need to get DNS information but cannot
+      create raw requests (for example JavaScript developers). They
+      can work by creating HTTP requests other than real DNS
+      queries.
+    </t>
 
-      <section title="REST HTTP API">
+    <t>
+      In this style of implementation DNS data is exchanged in other
+      formats than wire format, like JSON 
+      <xref target="I-D.bortzmeyer-dns-json"/>, or XML 
+      <xref target="I-D.mohan-dns-query-xml"/>. There are also lots of
+      REST DNS API developed by DNS service providers.
+    </t>
 
-        <t>As mentioned in use case 4, one motivation for REST HTTP API is for web developers 
-          (good for javascript users) who need to get DNS information but cannot create 
-          raw requests. They can work by creating HTTP requests other than real DNS queries</t>
+    <t>
+      Most of these APIs are developed in the scope of their own
+      system with different specification. But a typical query is 
+      a client will requesting a special formatted URI. Usually there
+      is a HTTP(S) server listening to port 80/443, which  will parse
+      the request and create a DNS query or DNS operation command
+      towards the real DNS. Unlike wire-format DNS over HTTP(S), once
+      the HTTP(S) server receives the response, it create the response 
+      by putting DNS data into various structured formats like JSON,
+      XML, YAML, or even plain text.
+    </t> 
 
-        <t>In this implementation DNS data is exchange in other format than wire format, like 
-          Json [draft-bortzmeyer-dns-json], or xml [draft-mohan-dns-query-xml]. There are also 
-          a bunch of REST DNS API developed by DNS SPs like [DYN-REST-API] </t>
+    <t>
+      However, this approach may have issues, because it is not based
+      on traditional DNS protocol. So there is no guarantee of the
+      protocol's completeness and correctness. The support of DNSSEC
+      might also be a problem cause the response usually do not
+      contain RR records with the answer, making it impossible for a
+      client to validate the reply.
+    </t>
+    </section> <!-- "REST HTTP API" -->
 
-         <t>Most of these APIs are developed in the scope of their own system with different 
-          specification. But the common and starting part is that a client will request a special formatted URI. Usually there is a HTTP(s) server listen to 80/443 will parse the request 
-          and create a DNS query or DNS operation command towards the real DNS. Different from DNS 
-          BINARY over HTTP(S), once the HTTP(s) server receive the response, it create the response 
-          putting DNS data into various format like Json, xml, yaml or even plain text.</t> 
-
-        <t>However, this approach may confront suspects, because it is not based on 
-          traditional DNS protocol. So there is no guarantee of the protocol's completeness 
-          and correctness. The support of DNSSEC might also be a problem cause the response 
-          usually do not contain RR records with the answer.</t>
-    </section>
-
-   </section>
+  </section> <!-- Different Implementations Approaches -->
 
 
     <section title="Open issues">
@@ -287,8 +362,9 @@
   <back>
 
     <references title="References">
-      &RFC1035; &RFC5246; &RFC5625;
-      &I-D.dprive-dns-over-tls;
+      &RFC1035; &RFC3234; &RFC5246; &RFC5625; &RFC5966;
+      &I-D.dprive-dns-over-tls; &I-D.bortzmeyer-dns-json;
+      &I-D.mohan-dns-query-xml;
 
      <reference anchor="DOTSE" target="http://www.iis.se/docs/Routertester_en.pdf">
 	        <front>
