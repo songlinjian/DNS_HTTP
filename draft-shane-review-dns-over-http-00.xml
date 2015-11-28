@@ -255,7 +255,7 @@
         
     </section> <!-- "DNS over TLS on port 443" -->
 
-    <section title="Wire-format DNS over HTTP(S)">
+    <section title="DNS Wire-format over HTTP(S)">
 
     <t>
       Different from DNS over TCP using port 80/443, another option is
@@ -280,7 +280,7 @@
         <t>The server decapsulates the HTTP package to DNS query, and
            resolves the DNS query.</t>
         <t>The server encapsulates the DNS response in HTTP(S) and
-           sends it back via the HTTP session.</t>
+           sends it back via the HTTP(S) session.</t>
       </list>
     </t>
 
@@ -289,12 +289,12 @@
       bits of the package is the message length and should be removed.
       There is an implementation of this methodology in golang
       (https://github.com/BII-Lab/DNSoverHTTPinGO) as well as C
-      (https://github.com/BII-Lab/DNSoverHTTP), maintained by BII lab
+      (https://github.com/BII-Lab/DNSoverHTTP), maintained by BII lab.
     </t>
 
     <t>
       In addition to the benefits mentioned before, the HTTP header
-      makes wire-format DNS over HTTP(S) easy to extend. Compared to
+      makes DNS wire-format over HTTP(S) easy to extend. Compared to
       creating a new option in EDNS0, using new parameters in HTTP
       header is far easier to deploy, since DNS messages with EDNS0
       may not pass some middle boxes.
@@ -303,7 +303,7 @@
     <t>
       One disadvantage of packaging DNS into HTTP is its cost.  Doing
       pack and unpack costs CPU and may result in higher response
-      time. The DNS over HTTP messages also has a risk of being
+      time. The DNS over HTTP messages also have a risk of being
       dropped by some firewalls which intercepts HTTP packets.  And it
       should be noted that if HTTPS is used here, then all the
       discussion of TLS in previous section is also applicable here.
@@ -351,12 +351,6 @@
 
   </section> <!-- Different Implementations Approaches -->
 
-
-    <section title="Open issues">
-    	<t>Other Naming experiment  etc</t>
-    
-    </section>
-  
   </middle>
 
   <back>
@@ -369,8 +363,8 @@
      <reference anchor="DOTSE" target="http://www.iis.se/docs/Routertester_en.pdf">
 	        <front>
 	                <title>DNSSEC Tests of Consumer Broadband Routers</title>
-			<author fullname="Ahlund"></author>
-			<author fullname="Wallstrom" ></author>
+			<author fullname="Joakim Åhlund" initials="J" surname="Åhlund"></author>
+			<author fullname="Patrik Wallström" initials="P" surname="Wallström" ></author>
 			<date year="2008" month="February" />            
 	       	</front>
 	   </reference>
@@ -390,7 +384,7 @@
 
       <reference anchor="dnssec-trigger" target="https://www.nlnetlabs.nl/projects/dnssec-trigger/">
           <front>
-                  <title>DNSSEC Tests of Consumer Broadband Routers</title>
+                  <title>Dnssec-Trigger</title>
       <author ></author>
       <date  />
       </front>
