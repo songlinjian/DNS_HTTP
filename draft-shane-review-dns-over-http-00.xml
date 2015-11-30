@@ -15,9 +15,12 @@
 <!ENTITY RFC5681 SYSTEM "http://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.5681.xml">
 <!ENTITY RFC5966 SYSTEM "http://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.5966.xml">
 <!ENTITY RFC6891 SYSTEM "http://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.6891.xml">
+<!ENTITY RFC7230 SYSTEM "http://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.7230.xml">
 <!ENTITY I-D.dprive-dns-over-tls SYSTEM "http://xml2rfc.ietf.org/public/rfc/bibxml3/reference.I-D.draft-ietf-dprive-dns-over-tls-01.xml">
 <!ENTITY I-D.bortzmeyer-dns-json SYSTEM "http://xml2rfc.ietf.org/public/rfc/bibxml3/reference.I-D.draft-bortzmeyer-dns-json-01.xml">
 <!ENTITY I-D.mohan-dns-query-xml SYSTEM "http://xml2rfc.ietf.org/public/rfc/bibxml3/reference.I-D.draft-mohan-dns-query-xml-00.xml">
+<!ENTITY I-D.ietf-dnsop-edns-client-subnet SYSTEM "http://xml2rfc.ietf.org/public/rfc/bibxml3/reference.I-D.draft-ietf-dnsop-edns-client-subnet-04.xml">
+
 ]>
 <?xml-stylesheet type='text/xsl' href='rfc2629.xslt' ?>
 <!-- used by XSLT processors -->
@@ -47,12 +50,25 @@
 <!-- end of list of popular I-D processing instructions -->
 <?rfc comments="no" ?>
 <?rfc inline="yes" ?>
-<rfc category="info" docName="draft-shane-dns-over-http-00" ipr="trust200902">
+<rfc category="info" docName="draft-shane-review-dns-over-http-00" ipr="trust200902">
 
   <front>
 
     <title>A review of implementation DNS over port 80/443</title>
 
+    <author fullname="Shane Kerr" initials="S." surname="Kerr">
+      <organization>Beijing Internet Institute</organization>
+      <address>
+        <postal>
+          <street>2/F, Building 5, No.58 Jinghai Road, BDA</street>
+          <city>Beijing</city>
+          <code>100176</code>
+          <country>CN</country>
+        </postal>
+        <email>shane@biigroup.cn</email>
+        <uri>http://www.biigroup.com/</uri>
+      </address>
+    </author>
 
     <author fullname="Linjian Song" initials="L." surname="Song">
       <organization>Beijing Internet Institute</organization>
@@ -65,20 +81,6 @@
           <country>P. R. China</country>
         </postal>
         <email>songlinjian@gmail.com</email>
-        <uri>http://www.biigroup.com/</uri>
-      </address>
-    </author>
-
-    <author fullname="Shane Kerr" initials="S." surname="Kerr">
-      <organization>Beijing Internet Institute</organization>
-      <address>
-        <postal>
-          <street>2/F, Building 5, No.58 Jinghai Road, BDA</street>
-          <city>Beijing</city>
-          <code>100176</code>
-          <country>CN</country>
-        </postal>
-        <email>shane@biigroup.cn</email>
         <uri>http://www.biigroup.com/</uri>
       </address>
     </author>
@@ -113,7 +115,7 @@
         The default DNS transport uses UDP on port 53. There are many
         motivations why users or operators may prefer to avoid sending
         DNS traffic in this way. A common solution is to use port 80
-        or 443; with plain TCP, TLS-encrypted TCP, or full HTTP(S).
+        or 443, with plain TCP, TLS-encrypted TCP, or full HTTP(S).
         This memo reviews the possible approaches and delivers some
         useful information for developers.
       </t>
@@ -136,25 +138,25 @@
     </t>
 
     <t>There are several use cases:</t>
-    <t><list style="numbers">
+    <t><list style="symbols">
       <t>
-        Firewalls or other middleboxes may interfere with normal DNS
+        Case 1: Firewalls or other middleboxes may interfere with normal DNS
         traffic <xref target="RFC3234"/> <xref target="RFC5625"/>
         <xref target="DOTSE"/> <xref target="SAC035"/>.
       </t>
       <t>
-        Clients may want to chose a resolver other than the one
+        Case 2: Clients may want to chose a resolver other than the one
         locally available. For example, some ISPs and hotels perform
         DNS rewriting to send users to advertising pages, or may use
         IP addresses which cause misleading geographic location for
-        the user. Users may want DNSSEC support which is not deployed
-        locally, and so on.
+        the user <xref target="I-D.ietf-dnsop-edns-client-subnet"/>. Users may want 
+        DNSSEC support which is not deployed locally, and so on.
       </t>
       <t>
-        Users may use DNS over TLS or HTTPS to protect privacy.
+        Case 3: Users may use DNS over TLS or HTTPS to protect privacy.
       </t>
       <t>
-        Developers may want a higher level DNS API. Web developers may
+        Case 4: Developers may want a higher level DNS API. Web developers may
         prefer different abstractions or familiar tools like JSON or
         XML, transmitted using HTTP or HTTPS.
       </t>
@@ -192,7 +194,7 @@
       or 443. The difference between port 80 and 443 is that the
       traffic of port 80 is usually intercepted as HTTP traffic while
       the traffic of port 443 is usually considered to be encrypted,
-      and typically ignored by middleboxes.  One example where
+      and typically ignored by middle-boxes.  One example where
       DNS is transported through port 80/443 is one of the fallback
       cases of NLnetLabs' DNSSEC trigger 
       <xref target="dnssec-trigger"/>.
@@ -260,14 +262,15 @@
 
     <t>
       Different from DNS over TCP using port 80/443, another option is
-      encapsulating DNS content into an HTTP body and sending it as
-      HTTP(S) traffic. It is quiet useful in use cases 1 &amp; 2
-      described in the introduction. This approach has the benefit
-      that HTTP usually makes it through even the worst coffee shop or
-      hotel room firewalls, as this expected by Internet users. We
-      also benefit from HTTP's persistent TCP connection pool concept,
-      which DNS on TCP/53 does not have. Finally, as with DNS over
-      TLS, HTTPS provides data integrity and privacy.
+      encapsulating DNS wire-format data into an HTTP body and sending 
+      it as HTTP(S) traffic. It is quiet useful in use cases 1 &amp; 2 
+      described in the introduction. 
+      This approach has the benefit that HTTP usually makes it through 
+      even the worst coffee shop or hotel room firewalls, as this expected 
+      by Internet users. It also benefits from HTTP's persistent TCP 
+      connection pool concept section 6.3 in <xref target="RFC7230"/>, which DNS on 
+      TCP/53 does not have. Finally, as with DNS over TLS, HTTPS 
+      provides data integrity and privacy.
     </t>
 
     <t>The basic methodology works as follows:
@@ -288,6 +291,9 @@
     <t>
       Note that if the original DNS query is sent by TCP, first two
       bits of the package is the message length and should be removed.
+      [Davey: ONLY in Proxy mode, the dns query is sent via TCP by client.
+      If the DNS over HTTP become a built in function for DNS software, 
+      there is no DNS over TCP in the middle.]
       There is an implementation of this methodology in the Go
       Programming Language
       (https://github.com/BII-Lab/DNSoverHTTPinGO) as well as C
@@ -295,18 +301,19 @@
     </t>
 
     <t>
-      In addition to the benefits mentioned before, the HTTP header
+      In addition to the benefits mentioned before, the HTTP header-field
       makes DNS wire-format over HTTP(S) easy to extend. Compared to
       creating a new option in EDNS0, using new parameters in HTTP
       header is far easier to deploy, since DNS messages with EDNS0
       may not pass some middle boxes.
+     [Davey: It is very interesting point, but may be controversial]
     </t>
 
     <t>
-      One disadvantage of packaging DNS into HTTP is its cost.  Doing
+      One disadvantage of packaging DNS into HTTP is its cost. Doing
       pack and unpack costs CPU and may result in higher response
       time. The DNS over HTTP messages also have a risk of being
-      dropped by some firewalls which intercepts HTTP packets.  And it
+      dropped by some firewalls which intercepts HTTP packets. And it
       should be noted that if HTTPS is used here, then all the
       discussion of TLS in previous section is also applicable here.
     </t>
@@ -358,20 +365,20 @@
   <back>
 
     <references title="References">
-      &RFC1035; &RFC3234; &RFC5246; &RFC5625; &RFC5966;
+      &RFC1035; &RFC3234; &RFC5246; &RFC5625; &RFC5966;&RFC7230;
       &I-D.dprive-dns-over-tls; &I-D.bortzmeyer-dns-json;
-      &I-D.mohan-dns-query-xml;
+      &I-D.mohan-dns-query-xml;&I-D.ietf-dnsop-edns-client-subnet;
 
      <reference anchor="DOTSE" target="http://www.iis.se/docs/Routertester_en.pdf">
-	        <front>
-	                <title>DNSSEC Tests of Consumer Broadband Routers</title>
-			<author fullname="Joakim Åhlund" initials="J" surname="Åhlund"></author>
-			<author fullname="Patrik Wallström" initials="P" surname="Wallström" ></author>
-			<date year="2008" month="February" />            
-	       	</front>
-	   </reference>
+          <front>
+                  <title>DNSSEC Tests of Consumer Broadband Routers</title>
+      <author fullname="Joakim Åhlund" initials="J" surname="Åhlund"></author>
+      <author fullname="Patrik Wallström" initials="P" surname="Wallström" ></author>
+      <date year="2008" month="February" />            
+          </front>
+     </reference>
 
-		   <reference anchor="SAC035">
+       <reference anchor="SAC035">
             <front>
                 <title>DNSSEC Impact on Broadband Routers and Firewalls </title>
                 <author>
