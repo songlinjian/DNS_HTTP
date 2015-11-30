@@ -115,7 +115,7 @@
         The default DNS transport uses UDP on port 53. There are many
         motivations why users or operators may prefer to avoid sending
         DNS traffic in this way. A common solution is to use port 80
-        or 443, with plain TCP, TLS-encrypted TCP, or full HTTP(S).
+        or 443; with plain TCP, TLS-encrypted TCP, or full HTTP(S).
         This memo reviews the possible approaches and delivers some
         useful information for developers.
       </t>
@@ -264,12 +264,12 @@
       Different from DNS over TCP using port 80/443, another option is
       encapsulating DNS wire-format data into an HTTP body and sending 
       it as HTTP(S) traffic. It is quiet useful in use cases 1 &amp; 2 
-      described in the introduction. 
-      This approach has the benefit that HTTP usually makes it through 
-      even the worst coffee shop or hotel room firewalls, as this expected 
-      by Internet users. It also benefits from HTTP's persistent TCP 
-      connection pool concept section 6.3 in <xref target="RFC7230"/>, which DNS on 
-      TCP/53 does not have. Finally, as with DNS over TLS, HTTPS 
+      described in the introduction.  This approach has the benefit
+      that HTTP usually makes it through even the worst coffee shop or
+      hotel room firewalls, as this expected by Internet users. It
+      also benefits from HTTP's persistent TCP connection pool concept
+      (see section 6.3 in <xref target="RFC7230"/>), which DNS on
+      TCP port 53 does not have. Finally, as with DNS over TLS, HTTPS
       provides data integrity and privacy.
     </t>
 
@@ -291,22 +291,20 @@
     <t>
       Note that if the original DNS query is sent by TCP, first two
       bits of the package is the message length and should be removed.
-      [Davey: ONLY in Proxy mode, the dns query is sent via TCP by client.
-      If the DNS over HTTP become a built in function for DNS software, 
-      there is no DNS over TCP in the middle.]
-      There is an implementation of this methodology in the Go
-      Programming Language
+      (This is only true if some software is translating from the DNS
+      protocol to DNS over HTTP, for example via a proxy. Native
+      implementations will of course not need this.) There is an
+      implementation of this methodology in the Go Programming Language
       (https://github.com/BII-Lab/DNSoverHTTPinGO) as well as C
       (https://github.com/BII-Lab/DNSoverHTTP), maintained by BII lab.
     </t>
 
     <t>
-      In addition to the benefits mentioned before, the HTTP header-field
+      In addition to the benefits mentioned before, the HTTP header
       makes DNS wire-format over HTTP(S) easy to extend. Compared to
       creating a new option in EDNS0, using new parameters in HTTP
       header is far easier to deploy, since DNS messages with EDNS0
       may not pass some middle boxes.
-     [Davey: It is very interesting point, but may be controversial]
     </t>
 
     <t>
@@ -365,7 +363,7 @@
   <back>
 
     <references title="References">
-      &RFC1035; &RFC3234; &RFC5246; &RFC5625; &RFC5966;&RFC7230;
+      &RFC1035; &RFC3234; &RFC5246; &RFC5625; &RFC5966; &RFC7230;
       &I-D.dprive-dns-over-tls; &I-D.bortzmeyer-dns-json;
       &I-D.mohan-dns-query-xml;&I-D.ietf-dnsop-edns-client-subnet;
 
