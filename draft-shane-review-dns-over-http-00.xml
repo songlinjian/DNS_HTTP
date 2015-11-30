@@ -15,6 +15,7 @@
 <!ENTITY RFC5681 SYSTEM "http://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.5681.xml">
 <!ENTITY RFC5966 SYSTEM "http://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.5966.xml">
 <!ENTITY RFC6891 SYSTEM "http://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.6891.xml">
+<!ENTITY RFC7230 SYSTEM "http://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.7230.xml">
 <!ENTITY I-D.dprive-dns-over-tls SYSTEM "http://xml2rfc.ietf.org/public/rfc/bibxml3/reference.I-D.draft-ietf-dprive-dns-over-tls-01.xml">
 <!ENTITY I-D.bortzmeyer-dns-json SYSTEM "http://xml2rfc.ietf.org/public/rfc/bibxml3/reference.I-D.draft-bortzmeyer-dns-json-01.xml">
 <!ENTITY I-D.mohan-dns-query-xml SYSTEM "http://xml2rfc.ietf.org/public/rfc/bibxml3/reference.I-D.draft-mohan-dns-query-xml-00.xml">
@@ -265,7 +266,7 @@
       This approach has the benefit that HTTP usually makes it through 
       even the worst coffee shop or hotel room firewalls, as this expected 
       by Internet users. It also benefits from HTTP's persistent TCP 
-      connection pool concept [section 6.3 in RFC 7230], which DNS on 
+      connection pool concept section 6.3 in <xref target="RFC7230"/>, which DNS on 
       TCP/53 does not have. Finally, as with DNS over TLS, HTTPS 
       provides data integrity and privacy.
     </t>
@@ -303,7 +304,7 @@
       creating a new option in EDNS0, using new parameters in HTTP
       header is far easier to deploy, since DNS messages with EDNS0
       may not pass some middle boxes.
-     [Davey: It is very interetsting point. But controversial]
+     [Davey: It is very interesting point, but may be controversial]
     </t>
 
     <t>
