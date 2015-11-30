@@ -19,6 +19,8 @@
 <!ENTITY I-D.dprive-dns-over-tls SYSTEM "http://xml2rfc.ietf.org/public/rfc/bibxml3/reference.I-D.draft-ietf-dprive-dns-over-tls-01.xml">
 <!ENTITY I-D.bortzmeyer-dns-json SYSTEM "http://xml2rfc.ietf.org/public/rfc/bibxml3/reference.I-D.draft-bortzmeyer-dns-json-01.xml">
 <!ENTITY I-D.mohan-dns-query-xml SYSTEM "http://xml2rfc.ietf.org/public/rfc/bibxml3/reference.I-D.draft-mohan-dns-query-xml-00.xml">
+<!ENTITY I-D.ietf-dnsop-edns-client-subnet SYSTEM "http://xml2rfc.ietf.org/public/rfc/bibxml3/reference.I-D.draft-ietf-dnsop-edns-client-subnet-04.xml">
+
 ]>
 <?xml-stylesheet type='text/xsl' href='rfc2629.xslt' ?>
 <!-- used by XSLT processors -->
@@ -127,7 +129,7 @@
   <section title="Introduction">
     
     <t>
-      Name servers uses port 53, on both UDP and TCP 
+      Name servers use port 53, on both UDP and TCP 
       <xref target="RFC1035"/> <xref target="RFC5966"/>. However,
       users or operators occasionally find it useful to use an
       alternative way to deliver DNS information, and often pick port
@@ -136,7 +138,7 @@
     </t>
 
     <t>There are several use cases:</t>
-    <t><list style="numbers">
+    <t><list style="symbols">
       <t>
         Case 1: Firewalls or other middleboxes may interfere with normal DNS
         traffic <xref target="RFC3234"/> <xref target="RFC5625"/>
@@ -147,8 +149,8 @@
         locally available. For example, some ISPs and hotels perform
         DNS rewriting to send users to advertising pages, or may use
         IP addresses which cause misleading geographic location for
-        the user. Users may want DNSSEC support which is not deployed
-        locally, and so on.
+        the user <xref target="I-D.ietf-dnsop-edns-client-subnet"/>. Users may want 
+        DNSSEC support which is not deployed locally, and so on.
       </t>
       <t>
         Case 3: Users may use DNS over TLS or HTTPS to protect privacy.
@@ -192,7 +194,7 @@
       or 443. The difference between port 80 and 443 is that the
       traffic of port 80 is usually intercepted as HTTP traffic while
       the traffic of port 443 is usually considered to be encrypted,
-      and typically ignored by middleboxes.  One example where
+      and typically ignored by middle-boxes.  One example where
       DNS is transported through port 80/443 is one of the fallback
       cases of NLnetLabs' DNSSEC trigger 
       <xref target="dnssec-trigger"/>.
@@ -365,18 +367,18 @@
     <references title="References">
       &RFC1035; &RFC3234; &RFC5246; &RFC5625; &RFC5966;&RFC7230;
       &I-D.dprive-dns-over-tls; &I-D.bortzmeyer-dns-json;
-      &I-D.mohan-dns-query-xml;
+      &I-D.mohan-dns-query-xml;&I-D.ietf-dnsop-edns-client-subnet;
 
      <reference anchor="DOTSE" target="http://www.iis.se/docs/Routertester_en.pdf">
-	        <front>
-	                <title>DNSSEC Tests of Consumer Broadband Routers</title>
-			<author fullname="Joakim Åhlund" initials="J" surname="Åhlund"></author>
-			<author fullname="Patrik Wallström" initials="P" surname="Wallström" ></author>
-			<date year="2008" month="February" />            
-	       	</front>
-	   </reference>
+          <front>
+                  <title>DNSSEC Tests of Consumer Broadband Routers</title>
+      <author fullname="Joakim Åhlund" initials="J" surname="Åhlund"></author>
+      <author fullname="Patrik Wallström" initials="P" surname="Wallström" ></author>
+      <date year="2008" month="February" />            
+          </front>
+     </reference>
 
-		   <reference anchor="SAC035">
+       <reference anchor="SAC035">
             <front>
                 <title>DNSSEC Impact on Broadband Routers and Firewalls </title>
                 <author>
