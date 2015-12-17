@@ -142,21 +142,20 @@
       <t>
         Case 1: Firewalls or other middleboxes may interfere with normal DNS
         traffic <xref target="RFC3234"/> <xref target="RFC5625"/>
-        <xref target="DOTSE"/> <xref target="SAC035"/>.
-      </t>
-      <t>
-        Case 2: Clients may want to chose a resolver other than the one
-        locally available. For example, some ISPs and hotels perform
+        <xref target="DOTSE"/> <xref target="SAC035"/>. In addition,
+        some ISPs and hotels block external DNS and perform
         DNS rewriting to send users to advertising pages, or may use
         IP addresses which cause misleading geographic location for
-        the user <xref target="I-D.ietf-dnsop-edns-client-subnet"/>. Users may want 
-        DNSSEC support which is not deployed locally, and so on.
+        the user <xref target="I-D.ietf-dnsop-edns-client-subnet"/>.
+        Users may want DNSSEC support which is not deployed locally in
+        such a case, and so on.
       </t>
       <t>
-        Case 3: Users may use DNS over TLS or HTTPS to protect privacy.
+        Case 2: Users may use DNS over TLS or HTTPS to protect privacy.
+        This also allows the client to authenticate the server.
       </t>
       <t>
-        Case 4: Developers may want a higher level DNS API. Web developers may
+        Case 3: Developers may want a higher level DNS API. Web developers may
         prefer different abstractions or familiar tools like JSON or
         XML, transmitted using HTTP or HTTPS.
       </t>
@@ -192,7 +191,8 @@
       In this way, the whole protocol is the same as current DNS
       transport in TCP, except the transport port is moved to port 80
       or 443. The difference between port 80 and 443 is that the
-      traffic of port 80 is usually intercepted as HTTP traffic while
+      traffic of port 80 is usually intercepted as HTTP traffic for 
+      purposes of deeper inspection, while
       the traffic of port 443 is usually considered to be encrypted,
       and typically ignored by middle-boxes.  One example where
       DNS is transported through port 80/443 is one of the fallback
@@ -239,7 +239,7 @@
     <t>
       TLS provide many benefits for DNS. First, it significantly
       reduces DNS conversation’s vulnerability of being hijacked.
-      Second, it prevents resolvers from coming amplifier of
+      Second, it prevents resolvers from becoming amplifiers of
       reflection attack. Additionally, it provides privacy by
       encrypted the conversation between client and server.
     </t>
@@ -319,7 +319,7 @@
 
     <section title="REST HTTP API">
     <t>
-      As mentioned in use case 4, one motivation of a REST HTTP API is
+      As mentioned in use case 3, one motivation of a REST HTTP API is
       for web developers who need to get DNS information but cannot
       create raw requests (for example JavaScript developers). They
       can work by creating HTTP requests other than real DNS
@@ -350,13 +350,19 @@
       However, this approach may have issues, because it is not based
       on traditional DNS protocol. So there is no guarantee of the
       protocol's completeness and correctness. The support of DNSSEC
-      might also be a problem cause the response usually do not
+      might also be a problem because the response usually do not
       contain RR records with the answer, making it impossible for a
       client to validate the reply.
     </t>
     </section> <!-- "REST HTTP API" -->
 
   </section> <!-- Different Implementations Approaches -->
+
+  <section title="Acknowledgments">
+    <t>
+    Thanks to Jinmei Tatuya for review.
+    </t>
+  </section> <!-- Acknowledgments -->
 
   </middle>
 
