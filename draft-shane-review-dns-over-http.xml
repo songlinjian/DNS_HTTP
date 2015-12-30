@@ -16,6 +16,7 @@
 <!ENTITY RFC5966 SYSTEM "http://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.5966.xml">
 <!ENTITY RFC6891 SYSTEM "http://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.6891.xml">
 <!ENTITY RFC7230 SYSTEM "http://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.7230.xml">
+<!ENTITY RFC7540 SYSTEM "http://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.7540.xml">
 <!ENTITY I-D.dprive-dns-over-tls SYSTEM "http://xml2rfc.ietf.org/public/rfc/bibxml3/reference.I-D.draft-ietf-dprive-dns-over-tls-01.xml">
 <!ENTITY I-D.bortzmeyer-dns-json SYSTEM "http://xml2rfc.ietf.org/public/rfc/bibxml3/reference.I-D.draft-bortzmeyer-dns-json-01.xml">
 <!ENTITY I-D.mohan-dns-query-xml SYSTEM "http://xml2rfc.ietf.org/public/rfc/bibxml3/reference.I-D.draft-mohan-dns-query-xml-00.xml">
@@ -50,7 +51,7 @@
 <!-- end of list of popular I-D processing instructions -->
 <?rfc comments="no" ?>
 <?rfc inline="yes" ?>
-<rfc category="info" docName="draft-shane-review-dns-over-http-00" ipr="trust200902">
+<rfc category="info" docName="draft-shane-review-dns-over-http-02" ipr="trust200902">
 
   <front>
 
@@ -230,18 +231,18 @@
 
     <t>
       As specified in RFC 5246 <xref target="RFC5246"/>, both the DNS
-      server and client can be authenticated or not authenticated. The
-      DNS service providers can decide authenticated pattern on both
-      server and client sides based on their own requirement for
-      security and privacy.
+      server and client can be authenticated or unauthenticated. The
+      DNS service providers and users can decide on whether
+      authentication is needed on both the server and client sides,
+      based on their own requirements for security and privacy.
     </t>
 
     <t>
       TLS provide many benefits for DNS. First, it significantly
-      reduces DNS conversation’s vulnerability of being hijacked.
+      reduces the DNS conversation's vulnerability to being hijacked.
       Second, it prevents resolvers from becoming amplifiers of
       reflection attack. Additionally, it provides privacy by
-      encrypted the conversation between client and server.
+      encrypting the conversation between client and server.
     </t>
   
     <t>
@@ -261,16 +262,27 @@
     <section title="DNS Wire-format over HTTP(S)">
 
     <t>
-      Different from DNS over TCP using port 80/443, another option is
-      encapsulating DNS wire-format data into an HTTP body and sending 
-      it as HTTP(S) traffic. It is quiet useful in use cases 1 &amp; 2 
-      described in the introduction.  This approach has the benefit
-      that HTTP usually makes it through even the worst coffee shop or
-      hotel room firewalls, as this expected by Internet users. It
-      also benefits from HTTP's persistent TCP connection pool concept
-      (see section 6.3 in <xref target="RFC7230"/>), which DNS on
-      TCP port 53 does not have. Finally, as with DNS over TLS, HTTPS
-      provides data integrity and privacy.
+      Different from raw DNS over TCP using port 80/443, another
+      option is encapsulating DNS wire-format data into an HTTP body
+      and sending it as HTTP(S) traffic. It is quiet useful in use
+      cases 1 &amp; 2 described in the introduction.  This approach
+      has the benefit that HTTP usually makes it through even the
+      worst coffee shop or hotel room firewalls, as this expected by
+      Internet users.
+    </t>
+
+    <t>
+      Using HTTP also benefits from HTTP's persistent TCP connection
+      pool concept (see section 6.3 in <xref target="RFC7230"/>),
+      which DNS on TCP port 53 does not have. Note that if HTTP/2 (see
+      <xref target="RFC7540"/>) is used then there may be concurrent
+      streams, and answers on different streams may arrive
+      out-of-order.
+    </t>
+
+    <t>
+      Finally, as with DNS over TLS, HTTPS provides data integrity and
+      privacy. Use of such encryption is recommended.
     </t>
 
     <t>The basic methodology works as follows:
@@ -308,12 +320,12 @@
     </t>
 
     <t>
-      One disadvantage of packaging DNS into HTTP is its cost. Doing
-      pack and unpack costs CPU and may result in higher response
-      time. The DNS over HTTP messages also have a risk of being
-      dropped by some firewalls which intercepts HTTP packets. And it
-      should be noted that if HTTPS is used here, then all the
-      discussion of TLS in previous section is also applicable here.
+      One disadvantage of packaging DNS into HTTP is its cost. Packing
+      and unpacking uses CPU and may result in higher response time.
+      The DNS over HTTP messages also have a risk of being dropped by
+      firewalls which intercepts HTTP packets. And it should be noted
+      that if HTTPS is used, then all the discussion of TLS in
+      previous section is also applicable here.
     </t>
     </section> <!-- "Wire-format DNS over HTTP(S)" -->
 
@@ -347,12 +359,17 @@
     </t> 
 
     <t>
-      However, this approach may have issues, because it is not based
-      on traditional DNS protocol. So there is no guarantee of the
-      protocol's completeness and correctness. The support of DNSSEC
+      However, such an approach may have issues, because it is not
+      based on traditional DNS protocol. So there is no guarantee of
+      the protocol's completeness and correctness. Support for DNSSEC
       might also be a problem because the response usually do not
       contain RR records with the answer, making it impossible for a
       client to validate the reply.
+    </t>
+
+    <t>
+      As with DNS over DNS Wire-format over HTTP, use of encryption is
+      encouraged.
     </t>
     </section> <!-- "REST HTTP API" -->
 
@@ -360,7 +377,9 @@
 
   <section title="Acknowledgments">
     <t>
-    Thanks to Jinmei Tatuya for review.
+    Thanks to Jinmei Tatuya for review. Thanks to Robert Edmonds for
+    pushing for encryption. Thanks to Mark Delany for raising the
+    issue of out-of-order responses.
     </t>
   </section> <!-- Acknowledgments -->
 
@@ -370,8 +389,9 @@
 
     <references title="References">
       &RFC1035; &RFC3234; &RFC5246; &RFC5625; &RFC5966; &RFC7230;
+      &RFC7540;
       &I-D.dprive-dns-over-tls; &I-D.bortzmeyer-dns-json;
-      &I-D.mohan-dns-query-xml;&I-D.ietf-dnsop-edns-client-subnet;
+      &I-D.mohan-dns-query-xml; &I-D.ietf-dnsop-edns-client-subnet;
 
      <reference anchor="DOTSE" target="http://www.iis.se/docs/Routertester_en.pdf">
           <front>
