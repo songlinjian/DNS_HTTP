@@ -105,8 +105,9 @@
 
     <abstract>
       <t>
-      In order to bypass DNS misbehavior on the path by middleboxes, 
-      this memo introduces a way to tunnel DNS data on wire using HTTP(S). 
+      This memo introduces a way to tunnel DNS data over HTTP. This
+      may be useful in any situation where DNS is not working
+      properly, such as when there is middlebox misbehavior.
       </t>
 
     </abstract>
@@ -125,98 +126,106 @@
       approaches are summarized in
       [draft-shane-review-DNS-over-http].</t>
 
-    <t>One of alternative way of DNS in this memo is to transport DNS binary data inside HTTP(S) 
-      to fulfill the goal of enhancing availability of DNS service. The DNS traffic 
-      is simply disguised into Web traffic using port 80/443 over HTTP. It can bypass
-      stupid middle box like firewall, proxy or traffic sharping devices on path 
-      which may jeopardize normal DNS traffic by misbehavior<xref target="RFC5625"/>
-      <xref target="DOTSE"/><xref target="SAC035"/>.
+    <t>One of alternative way of DNS described in that document is to
+      transport DNS binary data inside HTTP, with the goal of
+      improving DNS service availability. The DNS traffic is simply
+      sent as web traffic using port 80/443 over HTTP. It can bypass
+      badly behaving middle boxes like firewalls, proxyiesor traffic
+      shaping devices on path which might interfere with normal DNS
+      traffic <xref target="RFC5625"/> <xref target="DOTSE"/> <xref
+      target="SAC035"/>.
     </t>
 
     <t>This approach has the advantage that HTTP usually makes it through 
-      even the worst coffee shop or hotel room firewalls, as this is
-      expected by Internet users.  It also benefits from HTTP's support by default for persistent TCP 
-      connection for all request (see section 6.3 in <xref
-      target="RFC7230"/>). Note that <xref target="I-D.ietf-dnsop-5966bis">5966bis</xref>
-      specifies the persistent feature for DNS on TCP port 53, but
-      current DNS software does not support this mode of operation.
-      Finally HTTPS provides data integrity and privacy.
+      even the worst coffee shop or hotel room firewalls, as Internet
+      users expect web browsing to always work. It also benefits from
+      HTTP's support for persistent TCP connections (see section 6.3
+      in <xref target="RFC7230"/>). Note that <xref
+      target="I-D.ietf-dnsop-5966bis">5966bis</xref> specifies the
+      persistent feature for DNS on TCP port 53, but current DNS
+      software does not genreally support this mode of operation.
+      Finally, HTTPS provides data integrity and privacy.
     </t>
 
-      <t>Unlike a REST DNS API using JSON <xref target="I-D.bortzmeyer-dns-json"/>
-        or XML <xref target="I-D.mohan-dns-query-xml"/> encoding for DNS data, 
-        wire-format data is wrapped with a HTTP header and transmitted on port 80 
-        or 443. This protocol is not designed with web developers or
-        advanced usage in application development in mind. It simply
-        serves as a sort of DNS VPN which dose not require extra
-        parsing of another format of DNS data.
+    <t>Unlike a REST DNS API using JSON <xref target="I-D.bortzmeyer-dns-json"/>
+        or XML <xref target="I-D.mohan-dns-query-xml"/> encoding for
+        DNS data, in this approach wire-format data is wrapped with a
+        HTTP header and transmitted on port 80 or 443. This protocol
+        is not designed with web developers or advanced usage in
+        application development in mind. It simply serves as a sort of
+        DNS VPN, and does not introduce another format of DNS data.
        </t>
 
-      <t>This memo aims to introduce how the DNS binary over HTTP(s) concept works. 
-        Hopefully implementations by different developers following
-        this demo can speak with each other.</t>
+      <t>This memo aims to describe how the DNS binary over HTTP
+        concept works. Hopefully implementations by different
+        developers following this memo can speak with each other.
+      </t>
 
       <t>This mechanism is designed for client stub resolver to
-        recursive server. DNS zone transfer is out-of-scope for
-        this document.
+        recursive server. DNS zone transfer, DNS updates, and anything
+        other than simple DNS queries are out-of-scope for this
+        document.
       </t>
 
     </section>
 
     <section title="Methodology and Configuration">
 
-      <t>As it is mentioned in introduction, the basic methodology is wrapping the DNS 
-        wire-format data into HTTP(S) header and transmitted on port 80 or 443. However, 
-        there are two configuration scenarios for implementation.</t>
+      <t>As mentioned in introduction, the basic methodology is
+        wrapping the DNS wire-format data into an HTTP header and
+        transmitting on port 80 or 443. However, there are two
+        different scenarios for implementation.</t>
 
       <t>Scenario 1:</t>
 
-      <t>The DNS implementation handles DNS queries and responses via
-        both UDP and TCP on port 53, and HTTP(S) on port 80 or 443.
-        That means new functionality is added to existing 
-        DNS software as a built-in API. It works as follows:</t>
+      <t>The DNS server implementation handles DNS queries and
+        responses via both UDP and TCP on port 53, and HTTP on port 80
+        or 443. It works as follows:</t>
       <t><list style="numbers">
         <t>The client creates a DNS query message.</t>
-        <t>The client encapsulates the DNS message in a HTTP(S)
+        <t>The client encapsulates the DNS message in a HTTP
            message body and assigns parameters with the HTTP
            header.</t>
-        <t>The client connects to the server and issues an HTTP(S)
-           POST request method.</t>
-        <t>The server decapsulates the HTTP package to DNS query, and
-           resolves the DNS query.</t>
-        <t>The server encapsulates the DNS response in HTTP(S) and
-           sends it back via the HTTP(S) session.</t>
+        <t>The client connects to the server and issues an HTTP
+           POST request method. This may re-use an existing HTTP
+           connection.</t>
+        <t>The server decapsulates the HTTP packet to get the DNS
+           query, and resolves the DNS query.</t>
+        <t>The server encapsulates the DNS response in HTTP and
+           sends it back via the HTTP session.</t>
       </list>
       </t>
       <t>Scenario 2:</t>
 
-      <t>In this scenario there is a DNS-HTTP proxy (server and
-        client) sitting between stub-resolver and the recursive
-        server. It works like a DNS VPN and transmits wire-format DNS
-        messages over HTTP(S) between the proxy client and a server,
-        as follows:</t>
+      <t>In this scenario there is a DNS-HTTP proxy sitting between
+        stub-resolver and the recursive server. The stub uses a client
+        proxy and the recursive server uses a server proxy. This works
+        like a DNS VPN and transmits wire-format DNS messages over
+        HTTP between the proxy client and a server, as follows:</t>
       <t><list style="numbers">
         <t>The stub-resolver sends a DNS query (over UDP or TCP) to
            the proxy client.</t>
-        <t>The proxy client encapsulates the DNS message in a HTTP(S)
+        <t>The proxy client encapsulates the DNS message in an HTTP
            message body and assigns parameters with the HTTP header.</t>
-        <t>The proxy client connects to the proxy server and issues an HTTP(S)
-           POST request method.</t>
-        <t>The proxy server decapsulates the HTTP package to DNS query, and
-           sends it to a real DNS server over UDP/TCP.</t>
-        <t>The proxy server encapsulates the DNS response in HTTP(S) and
-           sends it back via the HTTP(S) session.</t>
-        <t>The proxy client decapsulates the DNS message from HTTP(s) response 
-          and sends it back to the stub-resolver via previous DNS
-          session (over UDP or TCP).</t>
+        <t>The proxy client connects to the proxy server and issues an
+           HTTP POST request method. This may re-use an existing HTTP
+           connection.</t>
+        <t>The proxy server decapsulates the HTTP packet to get the
+           DNS query, and sends it to a real DNS server over UDP/TCP.</t>
+        <t>The proxy server encapsulates the DNS response in HTTP and
+           sends it back via the HTTP session.</t>
+        <t>The proxy client decapsulates the DNS message from the HTTP
+          response and sends it back to the stub-resolver via previous
+          DNS session (either UDP or TCP).</t>
       </list>
        </t>
 
-      <t>Note that the proxy client can be implemented listening to a loop-back address 
-        in the same host with stub-resolver. The proxy server can be implemented 
-        as a caching server as well. It is also possible to use the
-        proxy server as a regular web server at the same time that is
-        is acting as a proxy server.</t>
+      <t>Note that the proxy client can be implemented listening to a
+        loop-back address in the same host with stub-resolver. The
+        proxy server can be implemented as a caching server as well.
+        It is also possible to use the proxy server as a regular web
+        server at the same time that is is acting as a proxy
+        server.</t>
 
     </section>
 
@@ -231,10 +240,10 @@
      <section title="Start-line"> 
 
       <t>By definition the HTTP start-line is either a request-line (for requests) or a 
-        status-line (for responses). Request-line consists of request
-        method, request-target, and HTTP-version with a CRLF in the end. </t>
+        status-line (for responses). A request-line consists of the request
+        method, request-target, and HTTP-version with a CRLF in the end.</t>
 
-      <t>For DNS query over HTTP, the request is always POST [section 4.3.3 in 
+      <t>For a DNS query over HTTP, the request is always POST [section 4.3.3 in 
         <xref target="RFC7230">RFC 7230</xref>]. Note if a GET is sent to the server, it 
         optionally returns a human-readable page showing its web server environment.</t>
 
@@ -242,7 +251,7 @@
         Derived from the target URI, the request-target in request-line identifies the target
         resource upon which to apply the request. In the case of DNS query over HTTP, one 
         approach is to always use a fixed string for request-target by
-        default, like "/dns-over-http". It works given there is no
+        default, like "/dns-over-http". It works if there is no
         other resource sharing the same request-target name, otherwise
         there may be a conflict. Another approach is to allow the
         server to use a defined URI which contains the specific
@@ -253,8 +262,8 @@
 
       <t>POST /dns-over-http HTTP/1.1</t>
 
-      <t>Regard to status-line, it returns status-code [Section 6 of 
-        <xref target="RFC7231">RFC 7231</xref>] which only 
+      <t>The status-line returns the status-code [Section 6 of 
+        <xref target="RFC7231">RFC 7231</xref>], which only 
       reflects status of HTTP connection. If the request has succeeded, the status-line is:</t>
 
       <t>HTTP/1.1 200 OK</t>
@@ -284,27 +293,12 @@
           message.
         </t>
 
-        <t>Davey: I encounter a question here. Does this memo just document the way of 
-          proxy-dns or a general protocol for DNS Binary over HTTP(s). If we target the 
-          general protocol format the proxy-dns is just one implementation case. And the 
-          Proxy-DNS-Transport header field is optional.</t>
-        <t>Shane: I think we should document our specific protocol.
-          There are an unlimited number of ways of doing things, and
-          listing many options actually makes it harder on
-          implementors, not easier!</t>
-
-        <t>Davey: Do we need to document other header fields and controls? or simple 
-          say use the default configuration? what's default? </t>
-        <t>Shane: My own feeling is "no". I don't know what the
-          standard practice in documenting such things is. Hopefully
-          Paul has a recommendatin...</t>
-
        </section>
 
 
       <section title="Message Body">
 
-      <t>As was mentioned, the message body is DNS wire-format data.</t>
+      <t>As mentioned, the message body is DNS wire-format data.</t>
 
       <t>It is worth mentioning that DNS messages sent over TCP connections is prefixed with 
         a two-byte length field which gives the message length[section 4.2.2 in <xref target="RFC1035">RFC 1035</xref>], 
@@ -325,6 +319,9 @@
 
   <section title="Considerations on DNS over HTTPS">
 
+      <t>HTTPS is recommended for communication. It provides privacy
+      and integrity for HTTP sessions.</t>
+
       <t>As specified in  <xref target="RFC5246">RFC 5246</xref>, both the DNS
       server and client can be authenticated or not authenticated. The
       DNS service providers can decide authenticated pattern on both
@@ -336,7 +333,7 @@
 
 
     <section title="IANA considerations">
-    	<t>Registration for a new header field: Proxy-DNS-Transport</t>
+    	<t>Registration for a new HTTP header field: Proxy-DNS-Transport</t>
     
     </section>
   
