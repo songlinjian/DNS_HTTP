@@ -5,8 +5,8 @@
 Internet Engineering Task Force                                  L. Song
 Internet-Draft                                                   S. Kerr
 Intended status: Experimental                                     R. Wan
-Expires: June 2, 2016                         Beijing Internet Institute
-                                                       November 30, 2015
+Expires: August 18, 2016                      Beijing Internet Institute
+                                                       February 15, 2016
 
 
                       DNS wire-format over HTTP(S)
@@ -14,8 +14,9 @@ Expires: June 2, 2016                         Beijing Internet Institute
 
 Abstract
 
-   In order to bypass DNS misbehavior on the path by middleboxes, this
-   memo introduces a way to tunnel DNS data on wire using HTTP(S).
+   This memo introduces a way to tunnel DNS data over HTTP.  This may be
+   useful in any situation where DNS is not working properly, such as
+   when there is middlebox misbehavior.
 
 Status of This Memo
 
@@ -32,11 +33,11 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on June 2, 2016.
+   This Internet-Draft will expire on August 18, 2016.
 
 Copyright Notice
 
-   Copyright (c) 2015 IETF Trust and the persons identified as the
+   Copyright (c) 2016 IETF Trust and the persons identified as the
    document authors.  All rights reserved.
 
    This document is subject to BCP 78 and the IETF Trust's Legal
@@ -52,10 +53,9 @@ Copyright Notice
 
 
 
-
-Song, et al.              Expires June 2, 2016                  [Page 1]
+Song, et al.             Expires August 18, 2016                [Page 1]
 
-Internet-Draft        DNS wire-format over HTTP(S)         November 2015
+Internet-Draft        DNS wire-format over HTTP(S)         February 2016
 
 
 Table of Contents
@@ -65,7 +65,7 @@ Table of Contents
    3.  DNS-over-HTTP Message Format  . . . . . . . . . . . . . . . .   4
      3.1.  Start-line  . . . . . . . . . . . . . . . . . . . . . . .   4
      3.2.  Header Fields . . . . . . . . . . . . . . . . . . . . . .   5
-     3.3.  Message Body  . . . . . . . . . . . . . . . . . . . . . .   6
+     3.3.  Message Body  . . . . . . . . . . . . . . . . . . . . . .   5
    4.  Considerations on DNS over HTTPS  . . . . . . . . . . . . . .   6
    5.  IANA considerations . . . . . . . . . . . . . . . . . . . . .   6
    6.  References  . . . . . . . . . . . . . . . . . . . . . . . . .   6
@@ -80,108 +80,109 @@ Table of Contents
    DNS transport.  These approaches are summarized in [draft-shane-
    review-DNS-over-http].
 
-   One of alternative way of DNS in this memo is to transport DNS binary
-   data inside HTTP(S) to fulfill the goal of enhancing availability of
-   DNS service.  The DNS traffic is simply disguised into Web traffic
-   using port 80/443 over HTTP.  It can bypass stupid middle box like
-   firewall, proxy or traffic sharping devices on path which may
-   jeopardize normal DNS traffic by misbehavior[RFC5625]
-   [DOTSE][SAC035].
+   One of alternative way of DNS described in that document is to
+   transport DNS binary data inside HTTP, with the goal of improving DNS
+   service availability.  The DNS traffic is simply sent as web traffic
+   using port 80/443 over HTTP.  It can bypass badly behaving middle
+   boxes like firewalls, proxyiesor traffic shaping devices on path
+   which might interfere with normal DNS traffic [RFC5625] [DOTSE]
+   [SAC035].
 
    This approach has the advantage that HTTP usually makes it through
-   even the worst coffee shop or hotel room firewalls, as this is
-   expected by Internet users.  It also benefits from HTTP's support by
-   default for persistent TCP connection for all request (see section
-   6.3 in [RFC7230]).  Note that 5966bis [I-D.ietf-dnsop-5966bis]
-   specifies the persistent feature for DNS on TCP port 53, but current
-   DNS software does not support this mode of operation.  Finally HTTPS
+   even the worst coffee shop or hotel room firewalls, as Internet users
+   expect web browsing to always work.  It also benefits from HTTP's
+   support for persistent TCP connections (see section 6.3 in
+   [RFC7230]).  Note that 5966bis [I-D.ietf-dnsop-5966bis] specifies the
+   persistent feature for DNS on TCP port 53, but current DNS software
+   does not genreally support this mode of operation.  Finally, HTTPS
    provides data integrity and privacy.
 
    Unlike a REST DNS API using JSON [I-D.bortzmeyer-dns-json] or XML
-   [I-D.mohan-dns-query-xml] encoding for DNS data, wire-format data is
-   wrapped with a HTTP header and transmitted on port 80 or 443.  This
-   protocol is not designed with web developers or advanced usage in
-   application development in mind.  It simply serves as a sort of DNS
-   VPN which dose not require extra parsing of another format of DNS
+   [I-D.mohan-dns-query-xml] encoding for DNS data, in this approach
+   wire-format data is wrapped with a HTTP header and transmitted on
+   port 80 or 443.  This protocol is not designed with web developers or
+   advanced usage in application development in mind.  It simply serves
+   as a sort of DNS VPN, and does not introduce another format of DNS
    data.
 
 
 
 
 
-Song, et al.              Expires June 2, 2016                  [Page 2]
+Song, et al.             Expires August 18, 2016                [Page 2]
 
-Internet-Draft        DNS wire-format over HTTP(S)         November 2015
+Internet-Draft        DNS wire-format over HTTP(S)         February 2016
 
 
-   This memo aims to introduce how the DNS binary over HTTP(s) concept
+   This memo aims to describe how the DNS binary over HTTP concept
    works.  Hopefully implementations by different developers following
-   this demo can speak with each other.
+   this memo can speak with each other.
 
    This mechanism is designed for client stub resolver to recursive
-   server.  DNS zone transfer is out-of-scope for this document.
+   server.  DNS zone transfer, DNS updates, and anything other than
+   simple DNS queries are out-of-scope for this document.
 
 2.  Methodology and Configuration
 
-   As it is mentioned in introduction, the basic methodology is wrapping
-   the DNS wire-format data into HTTP(S) header and transmitted on port
-   80 or 443.  However, there are two configuration scenarios for
+   As mentioned in introduction, the basic methodology is wrapping the
+   DNS wire-format data into an HTTP header and transmitting on port 80
+   or 443.  However, there are two different scenarios for
    implementation.
 
    Scenario 1:
 
-   The DNS implementation handles DNS queries and responses via both UDP
-   and TCP on port 53, and HTTP(S) on port 80 or 443.  That means new
-   functionality is added to existing DNS software as a built-in API.
-   It works as follows:
+   The DNS server implementation handles DNS queries and responses via
+   both UDP and TCP on port 53, and HTTP on port 80 or 443.  It works as
+   follows:
 
    1.  The client creates a DNS query message.
 
-   2.  The client encapsulates the DNS message in a HTTP(S) message body
+   2.  The client encapsulates the DNS message in a HTTP message body
        and assigns parameters with the HTTP header.
 
-   3.  The client connects to the server and issues an HTTP(S) POST
-       request method.
+   3.  The client connects to the server and issues an HTTP POST request
+       method.  This may re-use an existing HTTP connection.
 
-   4.  The server decapsulates the HTTP package to DNS query, and
+   4.  The server decapsulates the HTTP packet to get the DNS query, and
        resolves the DNS query.
 
-   5.  The server encapsulates the DNS response in HTTP(S) and sends it
-       back via the HTTP(S) session.
+   5.  The server encapsulates the DNS response in HTTP and sends it
+       back via the HTTP session.
 
    Scenario 2:
 
-   In this scenario there is a DNS-HTTP proxy (server and client)
-   sitting between stub-resolver and the recursive server.  It works
-   like a DNS VPN and transmits wire-format DNS messages over HTTP(S)
-   between the proxy client and a server, as follows:
+   In this scenario there is a DNS-HTTP proxy sitting between stub-
+   resolver and the recursive server.  The stub uses a client proxy and
+   the recursive server uses a server proxy.  This works like a DNS VPN
+   and transmits wire-format DNS messages over HTTP between the proxy
+   client and a server, as follows:
 
    1.  The stub-resolver sends a DNS query (over UDP or TCP) to the
        proxy client.
 
-   2.  The proxy client encapsulates the DNS message in a HTTP(S)
-       message body and assigns parameters with the HTTP header.
+   2.  The proxy client encapsulates the DNS message in an HTTP message
+       body and assigns parameters with the HTTP header.
 
 
 
-
-Song, et al.              Expires June 2, 2016                  [Page 3]
+Song, et al.             Expires August 18, 2016                [Page 3]
 
-Internet-Draft        DNS wire-format over HTTP(S)         November 2015
+Internet-Draft        DNS wire-format over HTTP(S)         February 2016
 
 
-   3.  The proxy client connects to the proxy server and issues an
-       HTTP(S) POST request method.
+   3.  The proxy client connects to the proxy server and issues an HTTP
+       POST request method.  This may re-use an existing HTTP
+       connection.
 
-   4.  The proxy server decapsulates the HTTP package to DNS query, and
-       sends it to a real DNS server over UDP/TCP.
+   4.  The proxy server decapsulates the HTTP packet to get the DNS
+       query, and sends it to a real DNS server over UDP/TCP.
 
-   5.  The proxy server encapsulates the DNS response in HTTP(S) and
-       sends it back via the HTTP(S) session.
+   5.  The proxy server encapsulates the DNS response in HTTP and sends
+       it back via the HTTP session.
 
-   6.  The proxy client decapsulates the DNS message from HTTP(s)
+   6.  The proxy client decapsulates the DNS message from the HTTP
        response and sends it back to the stub-resolver via previous DNS
-       session (over UDP or TCP).
+       session (either UDP or TCP).
 
    Note that the proxy client can be implemented listening to a loop-
    back address in the same host with stub-resolver.  The proxy server
@@ -199,12 +200,12 @@ Internet-Draft        DNS wire-format over HTTP(S)         November 2015
 3.1.  Start-line
 
    By definition the HTTP start-line is either a request-line (for
-   requests) or a status-line (for responses).  Request-line consists of
-   request method, request-target, and HTTP-version with a CRLF in the
-   end.
+   requests) or a status-line (for responses).  A request-line consists
+   of the request method, request-target, and HTTP-version with a CRLF
+   in the end.
 
-   For DNS query over HTTP, the request is always POST [section 4.3.3 in
-   RFC 7230 [RFC7230]].  Note if a GET is sent to the server, it
+   For a DNS query over HTTP, the request is always POST [section 4.3.3
+   in RFC 7230 [RFC7230]].  Note if a GET is sent to the server, it
    optionally returns a human-readable page showing its web server
    environment.
 
@@ -213,25 +214,27 @@ Internet-Draft        DNS wire-format over HTTP(S)         November 2015
    request-line identifies the target resource upon which to apply the
    request.  In the case of DNS query over HTTP, one approach is to
    always use a fixed string for request-target by default, like "/dns-
-   over-http".  It works given there is no other resource sharing the
-   same request-target name, otherwise there may be a conflict.  Another
+   over-http".  It works if there is no other resource sharing the same
+   request-target name, otherwise there may be a conflict.  Another
    approach is to allow the server to use a defined URI which contains
+
+
+
+
+Song, et al.             Expires August 18, 2016                [Page 4]
+
+Internet-Draft        DNS wire-format over HTTP(S)         February 2016
+
+
    the specific request-target.  In the BII proxy implementation, we use
    "/proxy_dns" for this purpose.
-
-
-
-Song, et al.              Expires June 2, 2016                  [Page 4]
-
-Internet-Draft        DNS wire-format over HTTP(S)         November 2015
-
 
    The HTTP-version is always "HTTP/1.1".  So the request-line is :
 
    POST /dns-over-http HTTP/1.1
 
-   Regard to status-line, it returns status-code [Section 6 of RFC 7231
-   [RFC7231]] which only reflects status of HTTP connection.  If the
+   The status-line returns the status-code [Section 6 of RFC 7231
+   [RFC7231]], which only reflects status of HTTP connection.  If the
    request has succeeded, the status-line is:
 
    HTTP/1.1 200 OK
@@ -258,33 +261,9 @@ Internet-Draft        DNS wire-format over HTTP(S)         November 2015
    server will see, and likewise for UDP.  This header field is used for
    both request and response, for all DNS over HTTP message.
 
-   Davey: I encounter a question here.  Does this memo just document the
-   way of proxy-dns or a general protocol for DNS Binary over HTTP(s).
-   If we target the general protocol format the proxy-dns is just one
-   implementation case.  And the Proxy-DNS-Transport header field is
-   optional.
-
-   Shane: I think we should document our specific protocol.  There are
-   an unlimited number of ways of doing things, and listing many options
-   actually makes it harder on implementors, not easier!
-
-   Davey: Do we need to document other header fields and controls? or
-   simple say use the default configuration? what's default?
-
-   Shane: My own feeling is "no".  I don't know what the standard
-   practice in documenting such things is.  Hopefully Paul has a
-   recommendatin...
-
-
-
-Song, et al.              Expires June 2, 2016                  [Page 5]
-
-Internet-Draft        DNS wire-format over HTTP(S)         November 2015
-
-
 3.3.  Message Body
 
-   As was mentioned, the message body is DNS wire-format data.
+   As mentioned, the message body is DNS wire-format data.
 
    It is worth mentioning that DNS messages sent over TCP connections is
    prefixed with a two-byte length field which gives the message
@@ -295,6 +274,14 @@ Internet-Draft        DNS wire-format over HTTP(S)         November 2015
    in RFC 7230 [RFC7230]]in which the field-value is the same with two
    bytes length field in DNS over TCP.
 
+
+
+
+Song, et al.             Expires August 18, 2016                [Page 5]
+
+Internet-Draft        DNS wire-format over HTTP(S)         February 2016
+
+
    In normal configuration, both client and server should assign a value
    for the DNS message length to HTTP content-length field.  In proxy
    configuration, if Proxy-DNS-Transport is TCP, the proxy must aware
@@ -302,6 +289,9 @@ Internet-Draft        DNS wire-format over HTTP(S)         November 2015
    HTTP request and response.
 
 4.  Considerations on DNS over HTTPS
+
+   HTTPS is recommended for communication.  It provides privacy and
+   integrity for HTTP sessions.
 
    As specified in RFC 5246 [RFC5246], both the DNS server and client
    can be authenticated or not authenticated.  The DNS service providers
@@ -311,7 +301,7 @@ Internet-Draft        DNS wire-format over HTTP(S)         November 2015
 
 5.  IANA considerations
 
-   Registration for a new header field: Proxy-DNS-Transport
+   Registration for a new HTTP header field: Proxy-DNS-Transport
 
 6.  References
 
@@ -330,14 +320,6 @@ Internet-Draft        DNS wire-format over HTTP(S)         November 2015
               Requirements", draft-ietf-dnsop-5966bis-04 (work in
               progress), November 2015.
 
-
-
-
-Song, et al.              Expires June 2, 2016                  [Page 6]
-
-Internet-Draft        DNS wire-format over HTTP(S)         November 2015
-
-
    [I-D.mohan-dns-query-xml]
               Parthasarathy, M. and P. Vixie, "Representing DNS messages
               using XML", draft-mohan-dns-query-xml-00 (work in
@@ -346,6 +328,15 @@ Internet-Draft        DNS wire-format over HTTP(S)         November 2015
    [RFC1035]  Mockapetris, P., "Domain names - implementation and
               specification", STD 13, RFC 1035, DOI 10.17487/RFC1035,
               November 1987, <http://www.rfc-editor.org/info/rfc1035>.
+
+
+
+
+
+Song, et al.             Expires August 18, 2016                [Page 6]
+
+Internet-Draft        DNS wire-format over HTTP(S)         February 2016
+
 
    [RFC5246]  Dierks, T. and E. Rescorla, "The Transport Layer Security
               (TLS) Protocol Version 1.2", RFC 5246,
@@ -381,19 +372,6 @@ Authors' Addresses
    URI:   http://www.biigroup.com/
 
 
-
-
-
-
-
-
-
-
-Song, et al.              Expires June 2, 2016                  [Page 7]
-
-Internet-Draft        DNS wire-format over HTTP(S)         November 2015
-
-
    Shane Kerr
    Beijing Internet Institute
    2/F, Building 5, No.58 Jinghai Road, BDA
@@ -402,6 +380,18 @@ Internet-Draft        DNS wire-format over HTTP(S)         November 2015
 
    Email: shane@biigroup.cn
    URI:   http://www.biigroup.com/
+
+
+
+
+
+
+
+
+
+Song, et al.             Expires August 18, 2016                [Page 7]
+
+Internet-Draft        DNS wire-format over HTTP(S)         February 2016
 
 
    Runxia Wan
@@ -445,4 +435,14 @@ Internet-Draft        DNS wire-format over HTTP(S)         November 2015
 
 
 
-Song, et al.              Expires June 2, 2016                  [Page 8]
+
+
+
+
+
+
+
+
+
+
+Song, et al.             Expires August 18, 2016                [Page 8]
