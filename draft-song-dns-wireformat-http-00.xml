@@ -233,9 +233,9 @@
     <section title="DNS-over-HTTP Message Format">
 
       <t>
-      Although this document is simply proposes that HTTP be used for DNS massage exchange, 
-      it is informative to explore the context with HTTP-specific semantics, such as HTTP 
-      request method, specific request-target, HTTP-version and HTTP header field, which 
+      Although this document simply proposes that HTTP be used for DNS massage exchange, 
+      it is informative to explore the context with HTTP-specific semantics, such as the HTTP 
+      request method, specific request-target, HTTP-version, and HTTP header field, all of which 
       have impact on interoperability as well as performance. 
       </t>
 
@@ -267,9 +267,9 @@
         "/proxy_dns" for this purpose.</t>
 
       <t>
-        DNS transaction over HTTP has no specific requirement for transport protocol, 
-        developer can use any version of HTTP to accomplish the transaction. But developer 
-        should be aware that HTTP/1.x <xref target="RFC7230">RFC 7230</xref>and HTTP/2 <xref target="RFC7540">RFC 7540</xref> do have difference in performance regarding 
+        DNS transaction over HTTP has no specific requirement for transport protocol; 
+        developers can use any version of HTTP to accomplish the transaction. But developers 
+        should be aware that HTTP/1.1 <xref target="RFC7230">RFC 7230</xref> and HTTP/2 <xref target="RFC7540">RFC 7540</xref> do have differences in performance regarding 
         multiplexing. HTTP/2 is fully multiplexed, instead of ordered and blocking. Because 
         there is a general desire to achieve similar performance with DNS over UDP, the modern 
         HTTP/2 is preferred for DNS over HTTP implementation. Note that there should be no 
