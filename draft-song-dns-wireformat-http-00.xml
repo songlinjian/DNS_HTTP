@@ -11,6 +11,7 @@
 <!ENTITY RFC5625 SYSTEM "http://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.5625.xml">
 <!ENTITY RFC7230 SYSTEM "http://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.7230.xml">
 <!ENTITY RFC7231 SYSTEM "http://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.7231.xml">
+<!ENTITY RFC7540 SYSTEM "http://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.7540.xml">
 <!ENTITY I-D.bortzmeyer-dns-json SYSTEM "http://xml2rfc.ietf.org/public/rfc/bibxml3/reference.I-D.draft-bortzmeyer-dns-json-01.xml">
 <!ENTITY I-D.mohan-dns-query-xml SYSTEM "http://xml2rfc.ietf.org/public/rfc/bibxml3/reference.I-D.draft-mohan-dns-query-xml-00.xml">
 <!ENTITY I-D.ietf-dnsop-5966bis SYSTEM "http://xml2rfc.ietf.org/public/rfc/bibxml3/reference.I-D.draft-ietf-dnsop-5966bis-04.xml">
@@ -231,6 +232,13 @@
 
     <section title="DNS-over-HTTP Message Format">
 
+      <t>
+      Although this document is simply proposes that HTTP be used for DNS massage exchange, 
+      it is informative to explore the context with HTTP-specific semantics, such as HTTP 
+      request method, specific request-target, HTTP-version and HTTP header field, which 
+      have impact on interoperability as well as performance. 
+      </t>
+
       <t>In HTTP 1.1 specification section 3 in <xref target="RFC7230">RFC 7230</xref>, 
       an HTTP message consists of three parts: start-line, header
       fields, and message body with an empty line between header
@@ -255,10 +263,20 @@
         other resource sharing the same request-target name, otherwise
         there may be a conflict. Another approach is to allow the
         server to use a defined URI which contains the specific
-        request-target. In the BII proxy implementation, we use
+        request-target. Note in the BII proxy implementation, we use
         "/proxy_dns" for this purpose.</t>
 
-      <t>The HTTP-version is always "HTTP/1.1". So the request-line is :</t>
+      <t>
+        DNS transaction over HTTP has no specific requirement for transport protocol, 
+        developer can use any version of HTTP to accomplish the transaction. But developer 
+        should be aware that HTTP/1.x <xref target="RFC7230">RFC 7230</xref>and HTTP/2 <xref target="RFC7540">RFC 7540</xref> do have difference in performance regarding 
+        multiplexing. HTTP/2 is fully multiplexed, instead of ordered and blocking. Because 
+        there is a general desire to achieve similar performance with DNS over UDP, the modern 
+        HTTP/2 is preferred for DNS over HTTP implementation. Note that there should be no 
+        problem for advanced HTTP protocol in the future deployed for DNS over HTTP.
+      </t>
+
+      <t>For example, given HTTP-version is "HTTP/1.1". So the request-line is :</t>
 
       <t>POST /dns-over-http HTTP/1.1</t>
 
@@ -342,7 +360,7 @@
   <back>
 
     <references title="References">
-      &RFC1035; &RFC5246; &RFC5625; &RFC7230; &RFC7231;
+      &RFC1035; &RFC5246; &RFC5625; &RFC7230; &RFC7231;&RFC7540;
       &I-D.ietf-dnsop-5966bis;
       &I-D.bortzmeyer-dns-json;&I-D.mohan-dns-query-xml;
 

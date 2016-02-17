@@ -1,3 +1,5 @@
-This project is my personal work on DNS over HTTP. 
+Two drafts in this repo. 
 
-It will follow the respository of BII Lab.
+One is a review of different implementation of DNS over 80/443. 
+
+Another one is the protocol we use for DNS wire-format over HTTP(S)
