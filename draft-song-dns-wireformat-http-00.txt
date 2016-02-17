@@ -5,8 +5,8 @@
 Internet Engineering Task Force                                  L. Song
 Internet-Draft                                                   S. Kerr
 Intended status: Experimental                                     R. Wan
-Expires: August 18, 2016                      Beijing Internet Institute
-                                                       February 15, 2016
+Expires: August 20, 2016                      Beijing Internet Institute
+                                                       February 17, 2016
 
 
                       DNS wire-format over HTTP(S)
@@ -33,7 +33,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on August 18, 2016.
+   This Internet-Draft will expire on August 20, 2016.
 
 Copyright Notice
 
@@ -53,7 +53,7 @@ Copyright Notice
 
 
 
-Song, et al.             Expires August 18, 2016                [Page 1]
+Song, et al.             Expires August 20, 2016                [Page 1]
 
 Internet-Draft        DNS wire-format over HTTP(S)         February 2016
 
@@ -65,7 +65,7 @@ Table of Contents
    3.  DNS-over-HTTP Message Format  . . . . . . . . . . . . . . . .   4
      3.1.  Start-line  . . . . . . . . . . . . . . . . . . . . . . .   4
      3.2.  Header Fields . . . . . . . . . . . . . . . . . . . . . .   5
-     3.3.  Message Body  . . . . . . . . . . . . . . . . . . . . . .   5
+     3.3.  Message Body  . . . . . . . . . . . . . . . . . . . . . .   6
    4.  Considerations on DNS over HTTPS  . . . . . . . . . . . . . .   6
    5.  IANA considerations . . . . . . . . . . . . . . . . . . . . .   6
    6.  References  . . . . . . . . . . . . . . . . . . . . . . . . .   6
@@ -109,7 +109,7 @@ Table of Contents
 
 
 
-Song, et al.             Expires August 18, 2016                [Page 2]
+Song, et al.             Expires August 20, 2016                [Page 2]
 
 Internet-Draft        DNS wire-format over HTTP(S)         February 2016
 
@@ -165,7 +165,7 @@ Internet-Draft        DNS wire-format over HTTP(S)         February 2016
 
 
 
-Song, et al.             Expires August 18, 2016                [Page 3]
+Song, et al.             Expires August 20, 2016                [Page 3]
 
 Internet-Draft        DNS wire-format over HTTP(S)         February 2016
 
@@ -192,6 +192,12 @@ Internet-Draft        DNS wire-format over HTTP(S)         February 2016
 
 3.  DNS-over-HTTP Message Format
 
+   Although this document is simply proposes that HTTP be used for DNS
+   massage exchange, it is informative to explore the context with HTTP-
+   specific semantics, such as HTTP request method, specific request-
+   target, HTTP-version and HTTP header field, which have impact on
+   interoperability as well as performance.
+
    In HTTP 1.1 specification section 3 in RFC 7230 [RFC7230], an HTTP
    message consists of three parts: start-line, header fields, and
    message body with an empty line between header fields and message
@@ -212,24 +218,35 @@ Internet-Draft        DNS wire-format over HTTP(S)         February 2016
    Usually the target URI is provides explicitly by the DNS services
    provider.  Derived from the target URI, the request-target in
    request-line identifies the target resource upon which to apply the
+
+
+
+Song, et al.             Expires August 20, 2016                [Page 4]
+
+Internet-Draft        DNS wire-format over HTTP(S)         February 2016
+
+
    request.  In the case of DNS query over HTTP, one approach is to
    always use a fixed string for request-target by default, like "/dns-
    over-http".  It works if there is no other resource sharing the same
    request-target name, otherwise there may be a conflict.  Another
    approach is to allow the server to use a defined URI which contains
+   the specific request-target.  Note in the BII proxy implementation,
+   we use "/proxy_dns" for this purpose.
 
+   DNS transaction over HTTP has no specific requirement for transport
+   protocol, developer can use any version of HTTP to accomplish the
+   transaction.  But developer should be aware that HTTP/1.x RFC 7230
+   [RFC7230]and HTTP/2 RFC 7540 [RFC7540] do have difference in
+   performance regarding multiplexing.  HTTP/2 is fully multiplexed,
+   instead of ordered and blocking.  Because there is a general desire
+   to achieve similar performance with DNS over UDP, the modern HTTP/2
+   is preferred for DNS over HTTP implementation.  Note that there
+   should be no problem for advanced HTTP protocol in the future
+   deployed for DNS over HTTP.
 
-
-
-Song, et al.             Expires August 18, 2016                [Page 4]
-
-Internet-Draft        DNS wire-format over HTTP(S)         February 2016
-
-
-   the specific request-target.  In the BII proxy implementation, we use
-   "/proxy_dns" for this purpose.
-
-   The HTTP-version is always "HTTP/1.1".  So the request-line is :
+   For example, given HTTP-version is "HTTP/1.1".  So the request-line
+   is :
 
    POST /dns-over-http HTTP/1.1
 
@@ -257,6 +274,14 @@ Internet-Draft        DNS wire-format over HTTP(S)         February 2016
    Where xyz is either UDP or TCP, which is the client's indication of
    how it received the underlying DNS query, and which the server will
    use when sending the query to the far-end DNS server.  This means if
+
+
+
+Song, et al.             Expires August 20, 2016                [Page 5]
+
+Internet-Draft        DNS wire-format over HTTP(S)         February 2016
+
+
    a stub DNS client asks for TCP, then that's what the far-end DNS
    server will see, and likewise for UDP.  This header field is used for
    both request and response, for all DNS over HTTP message.
@@ -273,14 +298,6 @@ Internet-Draft        DNS wire-format over HTTP(S)         February 2016
    context of HTTP, there is content-length header filed [section 3.3.2
    in RFC 7230 [RFC7230]]in which the field-value is the same with two
    bytes length field in DNS over TCP.
-
-
-
-
-Song, et al.             Expires August 18, 2016                [Page 5]
-
-Internet-Draft        DNS wire-format over HTTP(S)         February 2016
-
 
    In normal configuration, both client and server should assign a value
    for the DNS message length to HTTP content-length field.  In proxy
@@ -314,6 +331,13 @@ Internet-Draft        DNS wire-format over HTTP(S)         February 2016
               draft-bortzmeyer-dns-json-01 (work in progress), February
               2013.
 
+
+
+Song, et al.             Expires August 20, 2016                [Page 6]
+
+Internet-Draft        DNS wire-format over HTTP(S)         February 2016
+
+
    [I-D.ietf-dnsop-5966bis]
               Dickinson, J., Dickinson, S., Bellis, R., Mankin, A., and
               D. Wessels, "DNS Transport over TCP - Implementation
@@ -328,15 +352,6 @@ Internet-Draft        DNS wire-format over HTTP(S)         February 2016
    [RFC1035]  Mockapetris, P., "Domain names - implementation and
               specification", STD 13, RFC 1035, DOI 10.17487/RFC1035,
               November 1987, <http://www.rfc-editor.org/info/rfc1035>.
-
-
-
-
-
-Song, et al.             Expires August 18, 2016                [Page 6]
-
-Internet-Draft        DNS wire-format over HTTP(S)         February 2016
-
 
    [RFC5246]  Dierks, T. and E. Rescorla, "The Transport Layer Security
               (TLS) Protocol Version 1.2", RFC 5246,
@@ -357,10 +372,27 @@ Internet-Draft        DNS wire-format over HTTP(S)         February 2016
               DOI 10.17487/RFC7231, June 2014,
               <http://www.rfc-editor.org/info/rfc7231>.
 
+   [RFC7540]  Belshe, M., Peon, R., and M. Thomson, Ed., "Hypertext
+              Transfer Protocol Version 2 (HTTP/2)", RFC 7540,
+              DOI 10.17487/RFC7540, May 2015,
+              <http://www.rfc-editor.org/info/rfc7540>.
+
    [SAC035]   ICANN Security and Stability Advisory Committee, "DNSSEC
               Impact on Broadband Routers and Firewalls", 2008.
 
 Authors' Addresses
+
+
+
+
+
+
+
+
+Song, et al.             Expires August 20, 2016                [Page 7]
+
+Internet-Draft        DNS wire-format over HTTP(S)         February 2016
+
 
    Linjian Song
    Beijing Internet Institute
@@ -380,18 +412,6 @@ Authors' Addresses
 
    Email: shane@biigroup.cn
    URI:   http://www.biigroup.com/
-
-
-
-
-
-
-
-
-
-Song, et al.             Expires August 18, 2016                [Page 7]
-
-Internet-Draft        DNS wire-format over HTTP(S)         February 2016
 
 
    Runxia Wan
@@ -425,24 +445,4 @@ Internet-Draft        DNS wire-format over HTTP(S)         February 2016
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-Song, et al.             Expires August 18, 2016                [Page 8]
+Song, et al.             Expires August 20, 2016                [Page 8]
