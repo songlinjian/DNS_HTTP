@@ -192,11 +192,11 @@ Internet-Draft        DNS wire-format over HTTP(S)         February 2016
 
 3.  DNS-over-HTTP Message Format
 
-   Although this document is simply proposes that HTTP be used for DNS
+   Although this document simply proposes that HTTP be used for DNS
    massage exchange, it is informative to explore the context with HTTP-
-   specific semantics, such as HTTP request method, specific request-
-   target, HTTP-version and HTTP header field, which have impact on
-   interoperability as well as performance.
+   specific semantics, such as the HTTP request method, specific
+   request-target, HTTP-version, and HTTP header field, all of which
+   have impact on interoperability as well as performance.
 
    In HTTP 1.1 specification section 3 in RFC 7230 [RFC7230], an HTTP
    message consists of three parts: start-line, header fields, and
@@ -235,9 +235,9 @@ Internet-Draft        DNS wire-format over HTTP(S)         February 2016
    we use "/proxy_dns" for this purpose.
 
    DNS transaction over HTTP has no specific requirement for transport
-   protocol, developer can use any version of HTTP to accomplish the
-   transaction.  But developer should be aware that HTTP/1.x RFC 7230
-   [RFC7230]and HTTP/2 RFC 7540 [RFC7540] do have difference in
+   protocol; developers can use any version of HTTP to accomplish the
+   transaction.  But developers should be aware that HTTP/1.1 RFC 7230
+   [RFC7230] and HTTP/2 RFC 7540 [RFC7540] do have differences in
    performance regarding multiplexing.  HTTP/2 is fully multiplexed,
    instead of ordered and blocking.  Because there is a general desire
    to achieve similar performance with DNS over UDP, the modern HTTP/2
@@ -350,37 +350,37 @@ Internet-Draft        DNS wire-format over HTTP(S)         February 2016
               progress), September 2011.
 
    [RFC1035]  Mockapetris, P., "Domain names - implementation and
-              specification", STD 13, RFC 1035, DOI 10.17487/RFC1035,
-              November 1987, <http://www.rfc-editor.org/info/rfc1035>.
+              specification", STD 13, RFC 1035, November 1987.
 
    [RFC5246]  Dierks, T. and E. Rescorla, "The Transport Layer Security
-              (TLS) Protocol Version 1.2", RFC 5246,
-              DOI 10.17487/RFC5246, August 2008,
+              (TLS) Protocol Version 1.2", RFC 5246, DOI 10.17487/
+              RFC5246, August 2008,
               <http://www.rfc-editor.org/info/rfc5246>.
 
-   [RFC5625]  Bellis, R., "DNS Proxy Implementation Guidelines",
-              BCP 152, RFC 5625, DOI 10.17487/RFC5625, August 2009,
+   [RFC5625]  Bellis, R., "DNS Proxy Implementation Guidelines", BCP
+              152, RFC 5625, DOI 10.17487/RFC5625, August 2009,
               <http://www.rfc-editor.org/info/rfc5625>.
 
    [RFC7230]  Fielding, R., Ed. and J. Reschke, Ed., "Hypertext Transfer
-              Protocol (HTTP/1.1): Message Syntax and Routing",
-              RFC 7230, DOI 10.17487/RFC7230, June 2014,
+              Protocol (HTTP/1.1): Message Syntax and Routing", RFC
+              7230, DOI 10.17487/RFC7230, June 2014,
               <http://www.rfc-editor.org/info/rfc7230>.
 
    [RFC7231]  Fielding, R., Ed. and J. Reschke, Ed., "Hypertext Transfer
-              Protocol (HTTP/1.1): Semantics and Content", RFC 7231,
-              DOI 10.17487/RFC7231, June 2014,
+              Protocol (HTTP/1.1): Semantics and Content", RFC 7231, DOI
+              10.17487/RFC7231, June 2014,
               <http://www.rfc-editor.org/info/rfc7231>.
 
    [RFC7540]  Belshe, M., Peon, R., and M. Thomson, Ed., "Hypertext
-              Transfer Protocol Version 2 (HTTP/2)", RFC 7540,
-              DOI 10.17487/RFC7540, May 2015,
+              Transfer Protocol Version 2 (HTTP/2)", RFC 7540, DOI
+              10.17487/RFC7540, May 2015,
               <http://www.rfc-editor.org/info/rfc7540>.
 
    [SAC035]   ICANN Security and Stability Advisory Committee, "DNSSEC
               Impact on Broadband Routers and Firewalls", 2008.
 
 Authors' Addresses
+
 
 
 
