@@ -131,7 +131,7 @@
       transport DNS binary data inside HTTP, with the goal of
       improving DNS service availability. The DNS traffic is simply
       sent as web traffic using port 80/443 over HTTP. It can bypass
-      badly behaving middle boxes like firewalls, proxyiesor traffic
+      badly behaving middle boxes like firewalls, proxyies or traffic
       shaping devices on path which might interfere with normal DNS
       traffic <xref target="RFC5625"/> <xref target="DOTSE"/> <xref
       target="SAC035"/>.
@@ -311,6 +311,22 @@
           message.
         </t>
 
+        <t>Exposing the transport protocol of the query allows the
+           HTTP server proxy to send DNS queries to the recursive
+           resolver that look like those that the DNS client is
+           sending to the client proxy. If the stub resolver sent a
+           UDP packet, then this allows the recusive resolver to
+           implement the logic of truncating the packet properly,
+           instead of requiring that the HTTP client proxy somehow
+           manage that functionality.
+        </t>
+
+        <t>For a stub resolver that connect directly via HTTP to the
+           HTTP server proxy then this flag is not necessary, as the
+           entire response can always be delivered so truncation is
+           never required.
+        </t>
+
        </section>
 
 
@@ -322,15 +338,16 @@
         a two-byte length field which gives the message length[section 4.2.2 in <xref target="RFC1035">RFC 1035</xref>], 
         excluding the two-byte length field. This length field allows the low-level processing 
         to assemble a complete message before beginning to parse it. In the context of HTTP, 
-        there is content-length header filed [section 3.3.2 in <xref target="RFC7230">RFC 7230</xref>]in which the field-value 
+        there is content-length header field [section 3.3.2 in <xref target="RFC7230">RFC 7230</xref>]in which the field-value
         is the same with two bytes length field in DNS over TCP. </t>
 
-      <t>In normal configuration, both client and server should assign
-        a value for the DNS message length to HTTP content-length
-        field. In proxy configuration, if Proxy-DNS-Transport 
-        is TCP, the proxy must aware the two-byte length field in DNS
-        message over TCP before it handle HTTP request and
-        response.</t>
+      <t>Since this two-byte length field is redundant, when the
+         client proxy receives a DNS message over TCP, it does NOT
+         include the length field in the message sent to the server.
+         The length in the content-length header is only the size of
+         the DNS message itself, and does NOT include this two-byte
+         length header.
+      </t>
 
       </section> 
       </section>
