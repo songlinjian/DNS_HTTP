@@ -5,8 +5,8 @@
 Internet Engineering Task Force                                  L. Song
 Internet-Draft                                                   S. Kerr
 Intended status: Experimental                                     R. Wan
-Expires: August 29, 2016                      Beijing Internet Institute
-                                                       February 26, 2016
+Expires: August 31, 2016                      Beijing Internet Institute
+                                                       February 28, 2016
 
 
                       DNS wire-format over HTTP(S)
@@ -33,7 +33,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on August 29, 2016.
+   This Internet-Draft will expire on August 31, 2016.
 
 Copyright Notice
 
@@ -53,7 +53,7 @@ Copyright Notice
 
 
 
-Song, et al.             Expires August 29, 2016                [Page 1]
+Song, et al.             Expires August 31, 2016                [Page 1]
 
 Internet-Draft        DNS wire-format over HTTP(S)         February 2016
 
@@ -84,7 +84,7 @@ Table of Contents
    transport DNS binary data inside HTTP, with the goal of improving DNS
    service availability.  The DNS traffic is simply sent as web traffic
    using port 80/443 over HTTP.  It can bypass badly behaving middle
-   boxes like firewalls, proxyies or traffic shaping devices on path
+   boxes like firewalls, proxies or traffic shaping devices on path
    which might interfere with normal DNS traffic [RFC5625] [DOTSE]
    [SAC035].
 
@@ -94,7 +94,7 @@ Table of Contents
    support for persistent TCP connections (see section 6.3 in
    [RFC7230]).  Note that 5966bis [I-D.ietf-dnsop-5966bis] specifies the
    persistent feature for DNS on TCP port 53, but current DNS software
-   does not genreally support this mode of operation.  Finally, HTTPS
+   does not generally support this mode of operation.  Finally, HTTPS
    provides data integrity and privacy.
 
    Unlike a REST DNS API using JSON [I-D.bortzmeyer-dns-json] or XML
@@ -109,7 +109,7 @@ Table of Contents
 
 
 
-Song, et al.             Expires August 29, 2016                [Page 2]
+Song, et al.             Expires August 31, 2016                [Page 2]
 
 Internet-Draft        DNS wire-format over HTTP(S)         February 2016
 
@@ -165,7 +165,7 @@ Internet-Draft        DNS wire-format over HTTP(S)         February 2016
 
 
 
-Song, et al.             Expires August 29, 2016                [Page 3]
+Song, et al.             Expires August 31, 2016                [Page 3]
 
 Internet-Draft        DNS wire-format over HTTP(S)         February 2016
 
@@ -221,7 +221,7 @@ Internet-Draft        DNS wire-format over HTTP(S)         February 2016
 
 
 
-Song, et al.             Expires August 29, 2016                [Page 4]
+Song, et al.             Expires August 31, 2016                [Page 4]
 
 Internet-Draft        DNS wire-format over HTTP(S)         February 2016
 
@@ -277,7 +277,7 @@ Internet-Draft        DNS wire-format over HTTP(S)         February 2016
 
 
 
-Song, et al.             Expires August 29, 2016                [Page 5]
+Song, et al.             Expires August 31, 2016                [Page 5]
 
 Internet-Draft        DNS wire-format over HTTP(S)         February 2016
 
@@ -333,7 +333,7 @@ Internet-Draft        DNS wire-format over HTTP(S)         February 2016
 
 
 
-Song, et al.             Expires August 29, 2016                [Page 6]
+Song, et al.             Expires August 31, 2016                [Page 6]
 
 Internet-Draft        DNS wire-format over HTTP(S)         February 2016
 
@@ -365,38 +365,38 @@ Internet-Draft        DNS wire-format over HTTP(S)         February 2016
               progress), September 2011.
 
    [RFC1035]  Mockapetris, P., "Domain names - implementation and
-              specification", STD 13, RFC 1035, November 1987.
+              specification", STD 13, RFC 1035, DOI 10.17487/RFC1035,
+              November 1987, <http://www.rfc-editor.org/info/rfc1035>.
 
    [RFC5246]  Dierks, T. and E. Rescorla, "The Transport Layer Security
-              (TLS) Protocol Version 1.2", RFC 5246, DOI 10.17487/
-              RFC5246, August 2008,
+              (TLS) Protocol Version 1.2", RFC 5246,
+              DOI 10.17487/RFC5246, August 2008,
               <http://www.rfc-editor.org/info/rfc5246>.
 
-   [RFC5625]  Bellis, R., "DNS Proxy Implementation Guidelines", BCP
-              152, RFC 5625, DOI 10.17487/RFC5625, August 2009,
+   [RFC5625]  Bellis, R., "DNS Proxy Implementation Guidelines",
+              BCP 152, RFC 5625, DOI 10.17487/RFC5625, August 2009,
               <http://www.rfc-editor.org/info/rfc5625>.
 
    [RFC7230]  Fielding, R., Ed. and J. Reschke, Ed., "Hypertext Transfer
-              Protocol (HTTP/1.1): Message Syntax and Routing", RFC
-              7230, DOI 10.17487/RFC7230, June 2014,
+              Protocol (HTTP/1.1): Message Syntax and Routing",
+              RFC 7230, DOI 10.17487/RFC7230, June 2014,
               <http://www.rfc-editor.org/info/rfc7230>.
 
    [RFC7231]  Fielding, R., Ed. and J. Reschke, Ed., "Hypertext Transfer
-              Protocol (HTTP/1.1): Semantics and Content", RFC 7231, DOI
-              10.17487/RFC7231, June 2014,
+              Protocol (HTTP/1.1): Semantics and Content", RFC 7231,
+              DOI 10.17487/RFC7231, June 2014,
               <http://www.rfc-editor.org/info/rfc7231>.
 
 
 
-
-Song, et al.             Expires August 29, 2016                [Page 7]
+Song, et al.             Expires August 31, 2016                [Page 7]
 
 Internet-Draft        DNS wire-format over HTTP(S)         February 2016
 
 
    [RFC7540]  Belshe, M., Peon, R., and M. Thomson, Ed., "Hypertext
-              Transfer Protocol Version 2 (HTTP/2)", RFC 7540, DOI
-              10.17487/RFC7540, May 2015,
+              Transfer Protocol Version 2 (HTTP/2)", RFC 7540,
+              DOI 10.17487/RFC7540, May 2015,
               <http://www.rfc-editor.org/info/rfc7540>.
 
    [SAC035]   ICANN Security and Stability Advisory Committee, "DNSSEC
@@ -445,4 +445,4 @@ Authors' Addresses
 
 
 
-Song, et al.             Expires August 29, 2016                [Page 8]
+Song, et al.             Expires August 31, 2016                [Page 8]
