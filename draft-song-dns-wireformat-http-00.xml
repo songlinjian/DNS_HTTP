@@ -131,7 +131,7 @@
       transport DNS binary data inside HTTP, with the goal of
       improving DNS service availability. The DNS traffic is simply
       sent as web traffic using port 80/443 over HTTP. It can bypass
-      badly behaving middle boxes like firewalls, proxyies or traffic
+      badly behaving middle boxes like firewalls, proxies or traffic
       shaping devices on path which might interfere with normal DNS
       traffic <xref target="RFC5625"/> <xref target="DOTSE"/> <xref
       target="SAC035"/>.
@@ -144,7 +144,7 @@
       in <xref target="RFC7230"/>). Note that <xref
       target="I-D.ietf-dnsop-5966bis">5966bis</xref> specifies the
       persistent feature for DNS on TCP port 53, but current DNS
-      software does not genreally support this mode of operation.
+      software does not generally support this mode of operation.
       Finally, HTTPS provides data integrity and privacy.
     </t>
 
