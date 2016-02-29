@@ -44,11 +44,11 @@
 <!-- end of list of popular I-D processing instructions -->
 <?rfc comments="no" ?>
 <?rfc inline="yes" ?>
-<rfc category="exp" docName="draft-song-dns-wireformat-http-00" ipr="trust200902">
+<rfc category="exp" docName="draft-song-dnsop-dns-wireformat-http-00" ipr="trust200902">
 
   <front>
 
-    <title>DNS wire-format over HTTP(S)</title>
+    <title>DNS wire-format over HTTP</title>
 
     <author fullname="Linjian Song" initials="L." surname="Song">
       <organization>Beijing Internet Institute</organization>
@@ -315,7 +315,7 @@
            HTTP server proxy to send DNS queries to the recursive
            resolver that look like those that the DNS client is
            sending to the client proxy. If the stub resolver sent a
-           UDP packet, then this allows the recusive resolver to
+           UDP packet, then this allows the recursive resolver to
            implement the logic of truncating the packet properly,
            instead of requiring that the HTTP client proxy somehow
            manage that functionality.
