@@ -385,6 +385,12 @@
     	<t>Registration for a new HTTP header field: Proxy-DNS-Transport</t>
     
     </section>
+
+  <section title="Acknowledgments">
+    <t>
+    Thanks to Bob Harold and Paul Hoffman for review
+    </t>
+  </section> <!-- Acknowledgments -->
   
   </middle>
 

@@ -68,7 +68,8 @@ Table of Contents
      3.3.  Message Body  . . . . . . . . . . . . . . . . . . . . . .   6
    4.  Security Considerations . . . . . . . . . . . . . . . . . . .   6
    5.  IANA considerations . . . . . . . . . . . . . . . . . . . . .   7
-   6.  References  . . . . . . . . . . . . . . . . . . . . . . . . .   7
+   6.  Acknowledgments . . . . . . . . . . . . . . . . . . . . . . .   7
+   7.  References  . . . . . . . . . . . . . . . . . . . . . . . . .   7
    Authors' Addresses  . . . . . . . . . . . . . . . . . . . . . . .   8
 
 1.  Introduction
@@ -104,8 +105,7 @@ Table of Contents
    advanced usage in application development in mind (although it is
    possible for a web browser to use this protocol to perform DNS
    lookups, for example via JavaScript code).  The protocol is intended
-   to serve as a sort of DNS VPN, and does not introduce another format
-   of DNS data.
+
 
 
 
@@ -113,6 +113,9 @@ Song, et al.           Expires September 11, 2016               [Page 2]
 
 Internet-Draft          DNS wire-format over HTTP             March 2016
 
+
+   to serve as a sort of DNS VPN, and does not introduce another format
+   of DNS data.
 
    This memo aims to describe how the DNS binary over HTTP concept
    works.  Hopefully implementations by different developers following
@@ -160,15 +163,15 @@ Internet-Draft          DNS wire-format over HTTP             March 2016
    1.  The stub-resolver sends a DNS query (over UDP or TCP) to the
        proxy client.
 
-   2.  The proxy client encapsulates the DNS message in an HTTP message
-       body and assigns parameters with the HTTP header.
-
 
 
 Song, et al.           Expires September 11, 2016               [Page 3]
 
 Internet-Draft          DNS wire-format over HTTP             March 2016
 
+
+   2.  The proxy client encapsulates the DNS message in an HTTP message
+       body and assigns parameters with the HTTP header.
 
    3.  The proxy client connects to the proxy server and issues an HTTP
        POST request method.  This may re-use an existing HTTP
@@ -215,9 +218,6 @@ Internet-Draft          DNS wire-format over HTTP             March 2016
    optionally returns a human-readable page showing its web server
    environment.
 
-   Usually the target URI is provides explicitly by the DNS services
-   provider.  Derived from the target URI, the request-target in
-   request-line identifies the target resource upon which to apply the
 
 
 
@@ -226,6 +226,9 @@ Song, et al.           Expires September 11, 2016               [Page 4]
 Internet-Draft          DNS wire-format over HTTP             March 2016
 
 
+   Usually the target URI is provides explicitly by the DNS services
+   provider.  Derived from the target URI, the request-target in
+   request-line identifies the target resource upon which to apply the
    request.  In the case of DNS query over HTTP, one approach is to
    always use a fixed string for request-target by default, like "/dns-
    over-http".  It works if there is no other resource sharing the same
@@ -271,9 +274,6 @@ Internet-Draft          DNS wire-format over HTTP             March 2016
 
    Proxy-DNS-Transport: xyz
 
-   Where xyz is either UDP or TCP, which is the client's indication of
-   how it received the underlying DNS query, and which the server will
-   use when sending the query to the far-end DNS server.  This means if
 
 
 
@@ -282,6 +282,9 @@ Song, et al.           Expires September 11, 2016               [Page 5]
 Internet-Draft          DNS wire-format over HTTP             March 2016
 
 
+   Where xyz is either UDP or TCP, which is the client's indication of
+   how it received the underlying DNS query, and which the server will
+   use when sending the query to the far-end DNS server.  This means if
    a stub DNS client asks for TCP, then that's what the far-end DNS
    server will see, and likewise for UDP.  This header field is used for
    both request and response, for all DNS over HTTP message.
@@ -327,9 +330,6 @@ Internet-Draft          DNS wire-format over HTTP             March 2016
    Since HTTP is used, all of the security concerns of HTTP are also
    present.
 
-   Servers and clients SHOULD use TLS for communication.  It provides
-   privacy and integrity for HTTP sessions.  If TLS is used, then all of
-   the security concerns of TLS are also present.
 
 
 
@@ -337,6 +337,10 @@ Song, et al.           Expires September 11, 2016               [Page 6]
 
 Internet-Draft          DNS wire-format over HTTP             March 2016
 
+
+   Servers and clients SHOULD use TLS for communication.  It provides
+   privacy and integrity for HTTP sessions.  If TLS is used, then all of
+   the security concerns of TLS are also present.
 
    As specified in RFC 5246 [RFC5246], both the HTTP server and client
    can be authenticated or not authenticated.  Clients SHOULD
@@ -349,7 +353,11 @@ Internet-Draft          DNS wire-format over HTTP             March 2016
 
    Registration for a new HTTP header field: Proxy-DNS-Transport
 
-6.  References
+6.  Acknowledgments
+
+   Thanks to Bob Harold and Paul Hoffman for review
+
+7.  References
 
    [DOTSE]    and , "DNSSEC Tests of Consumer Broadband Routers",
               February 2008,
@@ -379,20 +387,16 @@ Internet-Draft          DNS wire-format over HTTP             March 2016
               RFC5246, August 2008,
               <http://www.rfc-editor.org/info/rfc5246>.
 
-   [RFC5625]  Bellis, R., "DNS Proxy Implementation Guidelines", BCP
-              152, RFC 5625, DOI 10.17487/RFC5625, August 2009,
-              <http://www.rfc-editor.org/info/rfc5625>.
-
-
-
-
-
 
 
 Song, et al.           Expires September 11, 2016               [Page 7]
 
 Internet-Draft          DNS wire-format over HTTP             March 2016
 
+
+   [RFC5625]  Bellis, R., "DNS Proxy Implementation Guidelines", BCP
+              152, RFC 5625, DOI 10.17487/RFC5625, August 2009,
+              <http://www.rfc-editor.org/info/rfc5625>.
 
    [RFC7230]  Fielding, R., Ed. and J. Reschke, Ed., "Hypertext Transfer
               Protocol (HTTP/1.1): Message Syntax and Routing", RFC
@@ -434,6 +438,18 @@ Authors' Addresses
    URI:   http://www.biigroup.com/
 
 
+
+
+
+
+
+
+
+Song, et al.           Expires September 11, 2016               [Page 8]
+
+Internet-Draft          DNS wire-format over HTTP             March 2016
+
+
    Runxia Wan
    Beijing Internet Institute
    2508 Room, 25th Floor, Tower A, Time Fortune
@@ -445,4 +461,44 @@ Authors' Addresses
 
 
 
-Song, et al.           Expires September 11, 2016               [Page 8]
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Song, et al.           Expires September 11, 2016               [Page 9]
