@@ -330,6 +330,11 @@
            never required.
         </t>
 
+        <t>The client MUST include this option. If it is missing then
+           it is an error and the server should respond with HTTP code
+           400 (bad request).
+        </t>
+
        </section>
 
 
@@ -356,6 +361,10 @@
       </section>
 
   <section title="Security Considerations">
+      <t>This protocol does not introduce any new security
+      considerations since it is built on the DNS and HTTP protocols.
+      </t>
+
       <t>Since this protocol transmits DNS messages, all of the
       security concerns that stub resolvers and recursive resolvers
       have with DNS messages apply. However, since HTTP uses TCP as
