@@ -224,6 +224,10 @@
       </list>
        </t>
 
+      <t>It is possible that these scenarios are mixed. The server may
+         speak DNS over HTTP directly and the client use a proxy, or
+         the other way around.</t>
+
       <t>Note that the proxy client can be implemented listening to a
         loop-back address in the same host with stub-resolver. The
         proxy server can be implemented as a caching server as well.
