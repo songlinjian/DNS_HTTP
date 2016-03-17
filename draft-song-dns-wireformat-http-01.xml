@@ -44,7 +44,7 @@
 <!-- end of list of popular I-D processing instructions -->
 <?rfc comments="no" ?>
 <?rfc inline="yes" ?>
-<rfc category="exp" docName="draft-song-dns-wireformat-http-01" ipr="trust200902">
+<rfc category="exp" docName="draft-song-dns-wireformat-http-02" ipr="trust200902">
 
   <front>
 
@@ -64,7 +64,6 @@
         <uri>http://www.biigroup.com/</uri>
       </address>
     </author>
-
 
     <author fullname="Shane Kerr" initials="S." surname="Kerr">
       <organization>Beijing Internet Institute</organization>
@@ -151,13 +150,12 @@
     <t>Unlike a REST DNS API using JSON <xref target="I-D.bortzmeyer-dns-json"/>
         or XML <xref target="I-D.mohan-dns-query-xml"/> encoding for
         DNS data, in this approach wire-format data is wrapped with a
-        HTTP header and transmitted on port 80 or 443. This protocol
-        is not designed with web developers or advanced usage in
-        application development in mind (although it is possible for a
-        web browser to use this protocol to perform DNS lookups, for
-        example via JavaScript code). The protocol is intended to
-        serve as a sort of DNS VPN, and does not introduce another
-        format of DNS data.
+        HTTP header and transmitted on port 80 or 443. The protocol is 
+        intended to serve as a sort of DNS VPN, and does not introduce 
+        another format of DNS data. It is also potential to provide new 
+        DNS APIs for advanced usage in application development. For example, 
+        web developers can create arbitrary HTTP/HTTPS queries and get DNS 
+        responses in their JavaScript apps.
        </t>
 
       <t>This memo aims to describe how the DNS binary over HTTP
