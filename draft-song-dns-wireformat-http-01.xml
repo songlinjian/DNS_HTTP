@@ -153,8 +153,11 @@
         DNS data, in this approach wire-format data is wrapped with a
         HTTP header and transmitted on port 80 or 443. This protocol
         is not designed with web developers or advanced usage in
-        application development in mind. It simply serves as a sort of
-        DNS VPN, and does not introduce another format of DNS data.
+        application development in mind (although it is possible for a
+        web browser to use this protocol to perform DNS lookups, for
+        example via JavaScript code). The protocol is intended to
+        serve as a sort of DNS VPN, and does not introduce another
+        format of DNS data.
        </t>
 
       <t>This memo aims to describe how the DNS binary over HTTP
@@ -221,11 +224,15 @@
       </list>
        </t>
 
+      <t>It is possible that these scenarios are mixed. The server may
+         speak DNS over HTTP directly and the client use a proxy, or
+         the other way around.</t>
+
       <t>Note that the proxy client can be implemented listening to a
         loop-back address in the same host with stub-resolver. The
         proxy server can be implemented as a caching server as well.
         It is also possible to use the proxy server as a regular web
-        server at the same time that is is acting as a proxy
+        server at the same time that is acting as a proxy
         server.</t>
 
     </section>
@@ -322,9 +329,14 @@
         </t>
 
         <t>For a stub resolver that connect directly via HTTP to the
-           HTTP server proxy then this flag is not necessary, as the
+           HTTP server proxy then this flag should be set to TCP, as the
            entire response can always be delivered so truncation is
            never required.
+        </t>
+
+        <t>The client MUST include this option. If it is missing then
+           it is an error and the server should respond with HTTP code
+           400 (bad request).
         </t>
 
        </section>
@@ -342,27 +354,42 @@
         is the same with two bytes length field in DNS over TCP. </t>
 
       <t>Since this two-byte length field is redundant, when the
-         client proxy receives a DNS message over TCP, it does NOT
+         client proxy receives a DNS message over TCP, it MUST NOT
          include the length field in the message sent to the server.
          The length in the content-length header is only the size of
-         the DNS message itself, and does NOT include this two-byte
+         the DNS message itself, and MUST NOT include this two-byte
          length header.
       </t>
 
       </section> 
       </section>
 
-  <section title="Considerations on DNS over HTTPS">
+  <section title="Security Considerations">
+      <t>This protocol does not introduce any new security
+      considerations since it is built on the DNS and HTTP protocols.
+      </t>
 
-      <t>HTTPS is recommended for communication. It provides privacy
-      and integrity for HTTP sessions.</t>
+      <t>Since this protocol transmits DNS messages, all of the
+      security concerns that stub resolvers and recursive resolvers
+      have with DNS messages apply. However, since HTTP uses TCP as
+      the underlying protocol, DNS reflection or amplification attacks
+      are not possible.</t>
 
-      <t>As specified in  <xref target="RFC5246">RFC 5246</xref>, both the DNS
-      server and client can be authenticated or not authenticated. The
-      DNS service providers can decide authenticated pattern on both
-      server and client sides based on their own requirement for security 
-      and privacy. For an open resolver, clients do not require
-      authentication. </t>
+      <t>Since HTTP is used, all of the security concerns of HTTP are
+      also present.</t>
+
+      <t>Servers and clients SHOULD use TLS for communication. It
+      provides privacy and integrity for HTTP sessions. If TLS is
+      used, then all of the security concerns of TLS are also
+      present.</t>
+
+      <t>As specified in  <xref target="RFC5246">RFC 5246</xref>, both
+      the HTTP server and client can be authenticated or not
+      authenticated. Clients SHOULD authenticate the certificate of
+      the HTTP server they connect to. The DNS service providers can
+      decide whether to authenticate the client side based on their
+      own requirement for security and privacy. For example, clients
+      of an open resolver do not require authentication.</t>
     
     </section>
 
@@ -371,6 +398,12 @@
     	<t>Registration for a new HTTP header field: Proxy-DNS-Transport</t>
     
     </section>
+
+  <section title="Acknowledgments">
+    <t>
+    Thanks to Bob Harold and Paul Hoffman for review
+    </t>
+  </section> <!-- Acknowledgments -->
   
   </middle>
 
