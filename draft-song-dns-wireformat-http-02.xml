@@ -9,6 +9,7 @@
 <!ENTITY RFC1035 SYSTEM "http://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.1035.xml">
 <!ENTITY RFC5246 SYSTEM "http://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.5246.xml">
 <!ENTITY RFC5625 SYSTEM "http://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.5625.xml">
+<!ENTITY RFC5785 SYSTEM "http://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.5785.xml">
 <!ENTITY RFC7230 SYSTEM "http://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.7230.xml">
 <!ENTITY RFC7231 SYSTEM "http://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.7231.xml">
 <!ENTITY RFC7540 SYSTEM "http://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.7540.xml">
@@ -62,6 +63,21 @@
         </postal>
         <email>songlinjian@gmail.com</email>
         <uri>http://www.biigroup.com/</uri>
+      </address>
+    </author>
+
+    <author fullname="Paul Vixie" initials="Vix" surname="Vixie">
+      <organization>TISF</organization>
+      <address>
+        <postal>
+        <street>11400 La Honda Road</street>
+        <city>Woodside</city>
+        <region>California</region>
+        <code>94062</code>
+        <country>US</country>
+      </postal>
+      <email>vixie@tisf.net</email>
+      <uri>http://www.redbarn.org/</uri>
       </address>
     </author>
 
@@ -257,33 +273,40 @@
         method, request-target, and HTTP-version with a CRLF in the end.</t>
 
       <t>For a DNS query over HTTP, the request is always POST [section 4.3.3 in 
-        <xref target="RFC7230">RFC 7230</xref>]. Note if a GET is sent to the server, it 
-        optionally returns a human-readable page showing its web server environment.</t>
+        <xref target="RFC7230">RFC 7230</xref>]. If a GET is sent to the server, it 
+        optionally returns a human-readable page showing its web server environment. 
+        
+        Note that choosing POST (not GET) as the request method for DNS wireformat 
+        over HTTP is mainly based on two reasons. One is that the protocol is designed 
+        using HTTP as a tunnel-like techonolgy carrying data from one side to another, 
+        not a web service with RESTful framework. Another is that from the view of 
+        implementation some server may ignore undefined entity-body if using GET; and 
+        HTTP libs vary on supporting GET with payload.
+      </t>
 
-      <t>Usually the target URI is provides explicitly by the DNS services provider.
-        Derived from the target URI, the request-target in request-line identifies the target
-        resource upon which to apply the request. In the case of DNS query over HTTP, one 
-        approach is to always use a fixed string for request-target by
-        default, like "/dns-over-http". It works if there is no
-        other resource sharing the same request-target name, otherwise
-        there may be a conflict. Another approach is to allow the
-        server to use a defined URI which contains the specific
-        request-target. Note in the BII proxy implementation, we use
-        "/proxy_dns" for this purpose.</t>
+      <t>Usually the target URI is provides explicitly by the services provider. Derived 
+        from the target URI, the request-target in request-line identifies the target
+        resource upon which to apply the request. To avoid URI conflicts and enhance 
+        interoperability, a well-known URI is necessary to allow interoperability. As defined in 
+        <xref target="RFC5785">RFC 5785</xref>, it begins with the characters "/.well-known/" 
+        and the name "dns-over-http". So the request-target for DNS wireformat over HTTP should 
+        be '/.well-known/dns-over-http'.
+      </t>
 
       <t>
         DNS transaction over HTTP has no specific requirement for transport protocol; 
         developers can use any version of HTTP to accomplish the transaction. But developers 
-        should be aware that HTTP/1.1 <xref target="RFC7230">RFC 7230</xref> and HTTP/2 <xref target="RFC7540">RFC 7540</xref> do have differences in performance regarding 
+        should be aware that HTTP/1.1 <xref target="RFC7230">RFC 7230</xref> and HTTP/2 
+        <xref target="RFC7540">RFC 7540</xref> do have differences in performance regarding 
         multiplexing. HTTP/2 is fully multiplexed, instead of ordered and blocking. Because 
         there is a general desire to achieve similar performance with DNS over UDP, the modern 
         HTTP/2 is preferred for DNS over HTTP implementation. Note that there should be no 
         problem for advanced HTTP protocol in the future deployed for DNS over HTTP.
       </t>
 
-      <t>For example, given HTTP-version is "HTTP/1.1". So the request-line is :</t>
+      <t>As an example, given HTTP-version is "HTTP/1.1", the request-line is :</t>
 
-      <t>POST /dns-over-http HTTP/1.1</t>
+      <t>POST /.well-known/dns-over-http HTTP/1.1</t>
 
       <t>The status-line returns the status-code [Section 6 of 
         <xref target="RFC7231">RFC 7231</xref>], which only 
@@ -342,9 +365,8 @@
 
       <section title="Message Body">
 
-      <t>As mentioned, the message body is DNS wire-format data.</t>
-
-      <t>It is worth mentioning that DNS messages sent over TCP connections is prefixed with 
+      <t>As mentioned, the message body is DNS wire-format data. It is worth mentioning 
+        that DNS messages sent over TCP connections is prefixed with 
         a two-byte length field which gives the message length[section 4.2.2 in <xref target="RFC1035">RFC 1035</xref>], 
         excluding the two-byte length field. This length field allows the low-level processing 
         to assemble a complete message before beginning to parse it. In the context of HTTP, 
@@ -394,12 +416,15 @@
 
     <section title="IANA considerations">
     	<t>Registration for a new HTTP header field: Proxy-DNS-Transport</t>
+
+      <t>Registration for a new Well-Known URI: "dns-over-http"</t>
+
     
     </section>
 
   <section title="Acknowledgments">
     <t>
-    Thanks to Bob Harold and Paul Hoffman for review
+    Thanks to Bob Harold and Paul Hoffman for review.
     </t>
   </section> <!-- Acknowledgments -->
   
@@ -408,7 +433,7 @@
   <back>
 
     <references title="References">
-      &RFC1035; &RFC5246; &RFC5625; &RFC7230; &RFC7231;&RFC7540;
+      &RFC1035; &RFC5246; &RFC5625;&RFC5785;&RFC7230; &RFC7231;&RFC7540;
       &I-D.ietf-dnsop-5966bis;
       &I-D.bortzmeyer-dns-json;&I-D.mohan-dns-query-xml;
 
