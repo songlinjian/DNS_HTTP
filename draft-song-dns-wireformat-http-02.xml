@@ -66,7 +66,7 @@
       </address>
     </author>
 
-    <author fullname="Paul Vixie" initials="Vix" surname="Vixie">
+    <author fullname="Paul Vixie" initials="P." surname="Vixie">
       <organization>TISF</organization>
       <address>
         <postal>
@@ -168,7 +168,7 @@
         DNS data, in this approach wire-format data is wrapped with a
         HTTP header and transmitted on port 80 or 443. The protocol is 
         intended to serve as a sort of DNS VPN, and does not introduce 
-        another format of DNS data. It is also potential to provide new 
+        another format of DNS data. It is also possible as a new 
         DNS APIs for advanced usage in application development. For example, 
         web developers can create arbitrary HTTP/HTTPS queries and get DNS 
         responses in their JavaScript apps.
@@ -275,12 +275,13 @@
       <t>For a DNS query over HTTP, the request is always POST [section 4.3.3 in 
         <xref target="RFC7230">RFC 7230</xref>]. If a GET is sent to the server, it 
         optionally returns a human-readable page showing its web server environment. 
-        
-        Note that choosing POST (not GET) as the request method for DNS wireformat 
+        </t>
+        <t>-
+        Note that choosing POST (not GET) as the request method for DNS wire-format 
         over HTTP is mainly based on two reasons. One is that the protocol is designed 
-        using HTTP as a tunnel-like techonolgy carrying data from one side to another, 
+        using HTTP as a tunnel-like technology carrying data from one side to another, 
         not a web service with RESTful framework. Another is that from the view of 
-        implementation some server may ignore undefined entity-body if using GET; and 
+        implementation some servers may ignore undefined entity-body if using GET; and 
         HTTP libs vary on supporting GET with payload.
       </t>
 
@@ -289,7 +290,7 @@
         resource upon which to apply the request. To avoid URI conflicts and enhance 
         interoperability, a well-known URI is necessary to allow interoperability. As defined in 
         <xref target="RFC5785">RFC 5785</xref>, it begins with the characters "/.well-known/" 
-        and the name "dns-over-http". So the request-target for DNS wireformat over HTTP should 
+        and the name "dns-over-http". So the request-target for DNS wire-format over HTTP SHOULD
         be '/.well-known/dns-over-http'.
       </t>
 
