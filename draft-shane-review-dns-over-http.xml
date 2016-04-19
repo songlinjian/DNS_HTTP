@@ -219,22 +219,13 @@
     <section title="DNS over TLS on port 443">
     <t>
       Another approach is DNS over TLS on port 443, which is also
-      implemented in DNSSEC trigger. It is similar to 
+      implemented in DNSSEC trigger. DNS over TLS is documented in
       <xref target="I-D.ietf-dprive-dns-over-tls"/>, which uses the
-      well-known port 853. Using port 443 to carry the traffic still
-      serves the purpose in use case 1, as some middle boxes may block
-      traffic on the new port.
-    </t>
-
-    <t>&lt;&lt; Note: or we can just recommend developer to follow 
-       draft-ietf-dprive-dns-over-tls but using port 443 &gt;&gt;</t>
-
-    <t>
-      As specified in RFC 5246 <xref target="RFC5246"/>, both the DNS
-      server and client can be authenticated or unauthenticated. The
-      DNS service providers and users can decide on whether
-      authentication is needed on both the server and client sides,
-      based on their own requirements for security and privacy.
+      well-known port 853. Using port 443 to carry the traffic instead
+      still serves the purpose in use case 1, as some middle boxes may
+      block traffic on the port 853.
+      <xref target="I-D.ietf-dprive-dns-over-tls"/> also discusses
+      authentication and privacy profiles.
     </t>
 
     <t>
@@ -317,6 +308,12 @@
       creating a new option in EDNS0, using new parameters in HTTP
       header is far easier to deploy, since DNS messages with EDNS0
       may not pass some middle boxes.
+    </t>
+
+    <t>
+      The DNS wire-format approach has the advantage that any future
+      changes to the DNS protocol will be transparently supported by
+      both client and server, even while continuing to use HTTP.
     </t>
 
     <t>
