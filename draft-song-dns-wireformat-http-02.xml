@@ -163,6 +163,15 @@
       Finally, HTTPS provides data integrity and privacy.
     </t>
 
+    <t>One alternative idea is to simply use a VPN, rather than a
+       custom protocol for this purpose. While this is possible, the
+       DNS over HTTP wire format protocol presented here works on an
+       actual HTTP server, so it can be hosted on a machine that also
+       serves web pages. This means that DNS over HTTP is slightly
+       more "stealthy" than a VPN, in that it can be indistinguishable
+       from normal web traffic.
+     </t>
+
     <t>Unlike a REST DNS API using JSON <xref target="I-D.bortzmeyer-dns-json"/>
         or XML <xref target="I-D.mohan-dns-query-xml"/> encoding for
         DNS data, in this approach wire-format data is wrapped with a
@@ -290,8 +299,8 @@
         resource upon which to apply the request. To avoid URI conflicts and enhance 
         interoperability, a well-known URI is necessary to allow interoperability. As defined in 
         <xref target="RFC5785">RFC 5785</xref>, it begins with the characters "/.well-known/" 
-        and the name "dns-over-http". So the request-target for DNS wire-format over HTTP SHOULD
-        be '/.well-known/dns-over-http'.
+        and the name "dns-wireformat". So the request-target for DNS wire-format over HTTP SHOULD
+        be '/.well-known/dns-wireformat'.
       </t>
 
       <t>
@@ -307,7 +316,7 @@
 
       <t>As an example, given HTTP-version is "HTTP/1.1", the request-line is :</t>
 
-      <t>POST /.well-known/dns-over-http HTTP/1.1</t>
+      <t>POST /.well-known/dns-wireformat HTTP/1.1</t>
 
       <t>The status-line returns the status-code [Section 6 of 
         <xref target="RFC7231">RFC 7231</xref>], which only 
@@ -327,8 +336,12 @@
 
       <t>By definition header fields are key:value pairs that can be used to communicate 
         data about the message, its payload, the target resource, or
-        the connection (for example control data). Considering the
-        proxy configuration in scenario 2, we use a new header field: </t>
+        the connection (for example control data).</t>
+
+      <t>The Content-Type: header should be set to "application/dns-wireformat".
+      </t>
+
+      <t>We add one a new header field: </t>
 
         <t>Proxy-DNS-Transport: xyz</t>
 
@@ -411,14 +424,25 @@
       decide whether to authenticate the client side based on their
       own requirement for security and privacy. For example, clients
       of an open resolver do not require authentication.</t>
+
+      <t>Note that the ability to perform DNS queries in this way may
+      allow users to bypass local DNS policy. This is problematic in
+      any environment where administrators need to enforce specific
+      DNS behavior, such as an enterprise environment. The protocol
+      outlined here does not introduce any new capabilities in this
+      area, but by creating a more standardized way of doing this it
+      may cause operational problems for enterprise
+      administrators.</t>
     
     </section>
 
 
     <section title="IANA considerations">
-    	<t>Registration for a new HTTP header field: Proxy-DNS-Transport</t>
+      <t>Registration for a new Media Type: dns-wireformat</t>
 
-      <t>Registration for a new Well-Known URI: "dns-over-http"</t>
+      <t>Registration for a new HTTP header field: Proxy-DNS-Transport</t>
+
+      <t>Registration for a new Well-Known URI: "dns-wireformat"</t>
 
     
     </section>
