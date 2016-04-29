@@ -142,7 +142,7 @@
       approaches are summarized in
       [draft-shane-review-DNS-over-http].</t>
 
-    <t>One of alternative way of DNS described in that document is to
+    <t>One of alternative way of using DNS described in that document is to
       transport DNS binary data inside HTTP, with the goal of
       improving DNS service availability. The DNS traffic is simply
       sent as web traffic using port 80/443 over HTTP. It can bypass
@@ -263,7 +263,7 @@
     <section title="DNS-over-HTTP Message Format">
 
       <t>
-      Although this document simply proposes that HTTP be used for DNS massage exchange, 
+      Although this document simply proposes that HTTP be used for DNS message exchange, 
       it is informative to explore the context with HTTP-specific semantics, such as the HTTP 
       request method, specific request-target, HTTP-version, and HTTP header field, all of which 
       have impact on interoperability as well as performance. 
@@ -282,7 +282,7 @@
         method, request-target, and HTTP-version with a CRLF in the end.</t>
 
       <t>For a DNS query over HTTP, the request is always POST [section 4.3.3 in 
-        <xref target="RFC7230">RFC 7230</xref>]. If a GET is sent to the server, it 
+        <xref target="RFC7231">RFC 7231</xref>]. If a GET is sent to the server, it 
         optionally returns a human-readable page showing its web server environment. 
         </t>
         <t>-
@@ -294,10 +294,10 @@
         HTTP libs vary on supporting GET with payload.
       </t>
 
-      <t>Usually the target URI is provides explicitly by the services provider. Derived 
+      <t>Usually the target URI is provided explicitly by the services provider. Derived 
         from the target URI, the request-target in request-line identifies the target
         resource upon which to apply the request. To avoid URI conflicts and enhance 
-        interoperability, a well-known URI is necessary to allow interoperability. As defined in 
+        interoperability, DNS wire-format over HTTP uses a well-known URI. As defined in 
         <xref target="RFC5785">RFC 5785</xref>, it begins with the characters "/.well-known/" 
         and the name "dns-wireformat". So the request-target for DNS wire-format over HTTP SHOULD
         be '/.well-known/dns-wireformat'.
@@ -306,8 +306,8 @@
       <t>
         DNS transaction over HTTP has no specific requirement for transport protocol; 
         developers can use any version of HTTP to accomplish the transaction. But developers 
-        should be aware that HTTP/1.1 <xref target="RFC7230">RFC 7230</xref> and HTTP/2 
-        <xref target="RFC7540">RFC 7540</xref> do have differences in performance regarding 
+        should be aware that HTTP 1.1 <xref target="RFC7230"/> and HTTP/2 
+        <xref target="RFC7540"/> do have differences in performance regarding 
         multiplexing. HTTP/2 is fully multiplexed, instead of ordered and blocking. Because 
         there is a general desire to achieve similar performance with DNS over UDP, the modern 
         HTTP/2 is preferred for DNS over HTTP implementation. Note that there should be no 
@@ -319,7 +319,7 @@
       <t>POST /.well-known/dns-wireformat HTTP/1.1</t>
 
       <t>The status-line returns the status-code [Section 6 of 
-        <xref target="RFC7231">RFC 7231</xref>], which only 
+        <xref target="RFC7231"/>], which only 
       reflects status of HTTP connection. If the request has succeeded, the status-line is:</t>
 
       <t>HTTP/1.1 200 OK</t>
@@ -338,7 +338,7 @@
         data about the message, its payload, the target resource, or
         the connection (for example control data).</t>
 
-      <t>The Content-Type: header should be set to "application/dns-wireformat".
+      <t>The Content-Type: header field should be set to "application/dns-wireformat".
       </t>
 
       <t>We add one a new header field: </t>
@@ -381,10 +381,10 @@
 
       <t>As mentioned, the message body is DNS wire-format data. It is worth mentioning 
         that DNS messages sent over TCP connections is prefixed with 
-        a two-byte length field which gives the message length[section 4.2.2 in <xref target="RFC1035">RFC 1035</xref>], 
+        a two-byte length field which gives the message length [section 4.2.2 in <xref target="RFC1035">RFC 1035</xref>], 
         excluding the two-byte length field. This length field allows the low-level processing 
         to assemble a complete message before beginning to parse it. In the context of HTTP, 
-        there is content-length header field [section 3.3.2 in <xref target="RFC7230">RFC 7230</xref>]in which the field-value
+        there is content-length header field [section 3.3.2 in <xref target="RFC7230"/>]in which the field-value
         is the same with two bytes length field in DNS over TCP. </t>
 
       <t>Since this two-byte length field is redundant, when the
@@ -449,7 +449,7 @@
 
   <section title="Acknowledgments">
     <t>
-    Thanks to Bob Harold and Paul Hoffman for review.
+    Thanks to Bob Harold, Paul Hoffman, and Julian Reschke for review.
     </t>
   </section> <!-- Acknowledgments -->
   
