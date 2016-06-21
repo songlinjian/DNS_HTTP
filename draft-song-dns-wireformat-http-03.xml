@@ -262,39 +262,32 @@
 
     <section title="DNS-over-HTTP Message Format">
 
-      <t>
-      Although this document simply proposes that HTTP be used for DNS message exchange, 
-      it is informative to explore the context with HTTP-specific semantics, such as the HTTP 
-      request method, specific request-target, HTTP-version, and HTTP header field, all of which 
-      have impact on interoperability as well as performance. 
+      <t>DNS over HTTP is not tied to a specific version of HTTP, and should work with
+        <xref target="RFC7230">HTTP 1.1</xref> and <xref target="RFC7540">HTTP/2</xref>.
+        This section describes the details of the DNS over HTTP message format.
       </t>
 
-      <t>In HTTP 1.1 specification section 3 in <xref target="RFC7230">RFC 7230</xref>, 
-      an HTTP message consists of three parts: start-line, header
-      fields, and message body with an empty line between header
-      fields and message body. The DNS over HTTP message also contains
-      these parts.</t>
+     <section title="Request Method">
 
-     <section title="Start-line"> 
-
-      <t>By definition the HTTP start-line is either a request-line (for requests) or a 
-        status-line (for responses). A request-line consists of the request
-        method, request-target, and HTTP-version with a CRLF in the end.</t>
-
-      <t>For a DNS query over HTTP, the request is always POST [section 4.3.3 in 
-        <xref target="RFC7231">RFC 7231</xref>]. If a GET is sent to the server, it 
-        optionally returns a human-readable page showing its web server environment. 
-        </t>
-        <t>-
-        Note that choosing POST (not GET) as the request method for DNS wire-format 
-        over HTTP is mainly based on two reasons. One is that the protocol is designed 
-        using HTTP as a tunnel-like technology carrying data from one side to another, 
-        not a web service with RESTful framework. Another is that from the view of 
-        implementation some servers may ignore undefined entity-body if using GET; and 
-        HTTP libs vary on supporting GET with payload.
+      <t>A DNS message is sent over HTTP from the client to the server
+        via a properly-formed HTTP request.  This is a POST method
+        request [section 4.3.3 in <xref target="RFC7231">RFC
+        7231</xref>]. If a GET method request is sent to the server,
+        it optionally returns a human-readable page showing
+        information targeted at users.
       </t>
 
-      <t>Usually the target URI is provided explicitly by the services provider. Derived 
+      <t>Note that choosing POST (and not GET) as the request
+        method for DNS wire-format over HTTP is mainly based on two
+        reasons. One is that the protocol is designed using HTTP as a
+        tunnel-like technology carrying data from one side to another,
+        not a web service with RESTful framework. Another is that from
+        the view of implementation some servers or middleboxes may
+        ignore an undefined entity-body if using GET; and HTTP
+        libraries have varying support for using GET with a payload.
+      </t>
+
+      <t>The target URI is provided explicitly by the services provider. Derived
         from the target URI, the request-target in request-line identifies the target
         resource upon which to apply the request. To avoid URI conflicts and enhance 
         interoperability, DNS wire-format over HTTP uses a well-known URI. As defined in 
@@ -304,7 +297,7 @@
       </t>
 
       <t>
-        DNS transaction over HTTP has no specific requirement for transport protocol; 
+        A DNS transaction over HTTP has no specific requirements for the transport protocol;
         developers can use any version of HTTP to accomplish the transaction. But developers 
         should be aware that HTTP 1.1 <xref target="RFC7230"/> and HTTP/2 
         <xref target="RFC7540"/> do have differences in performance regarding 
@@ -314,25 +307,29 @@
         problem for advanced HTTP protocol in the future deployed for DNS over HTTP.
       </t>
 
-      <t>As an example, given HTTP-version is "HTTP/1.1", the request-line is :</t>
+     </section> <!-- Request  Method -->
 
-      <t>POST /.well-known/dns-wireformat HTTP/1.1</t>
-
-      <t>The status-line returns the status-code [Section 6 of 
-        <xref target="RFC7231"/>], which only 
-      reflects status of HTTP connection. If the request has succeeded, the status-line is:</t>
-
-      <t>HTTP/1.1 200 OK</t>
+     <section title="Response Status Code">
+      <t>The status code [Section 6 of <xref target="RFC7231"/>], only
+         reflects the status of the HTTP connection. If the request
+         has succeeded, the status code is 200 (OK).
+      </t>
 
       <t>If the request fails, the proxy server will supply an
          appropriate error code, typically 4xx (client error) if the
          client has provided a query that the server cannot understand
          for some reasons, or 5xx (server error) if some server-side
-         problem prevented a query from succeeding.</t>
+         problem prevented a query from succeeding.
+      </t>
 
-      </section>
+      <t>To be clear, a failure on the DNS side should result in a
+         status code of 200 (OK) as long as the HTTP request is valid
+         and can be answered. The DNS error will be returned via the
+         encapsulated DNS message.
+      </t>
+     </section> <!-- Response Status Code -->
 
-      <section title="Header Fields">
+     <section title="Header Fields">
 
       <t>By definition header fields are key:value pairs that can be used to communicate 
         data about the message, its payload, the target resource, or
@@ -349,8 +346,6 @@
           received the underlying DNS query, and which the server will use when sending 
           the query to the far-end DNS server. This means if a stub DNS client asks for 
           TCP, then that's what the far-end DNS server will see, and likewise for UDP. 
-          This header field is used for both request and response, for all DNS over HTTP 
-          message.
         </t>
 
         <t>Exposing the transport protocol of the query allows the
@@ -363,7 +358,7 @@
            manage that functionality.
         </t>
 
-        <t>For a stub resolver that connect directly via HTTP to the
+        <t>For a stub resolver that connects directly via HTTP to the
            HTTP server proxy then this flag should be set to TCP, as the
            entire response can always be delivered so truncation is
            never required.
@@ -374,7 +369,7 @@
            400 (bad request).
         </t>
 
-       </section>
+      </section> <!-- Header Fields -->
 
 
       <section title="Message Body">

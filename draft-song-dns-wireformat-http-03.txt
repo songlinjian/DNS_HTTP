@@ -5,11 +5,11 @@
 Internet Engineering Task Force                                  L. Song
 Internet-Draft                                Beijing Internet Institute
 Intended status: Experimental                                   P. Vixie
-Expires: October 29, 2016                                           TISF
+Expires: December 23, 2016                                          TISF
                                                                  S. Kerr
                                                                   R. Wan
                                               Beijing Internet Institute
-                                                          April 27, 2016
+                                                           June 21, 2016
 
 
                        DNS wire-format over HTTP
@@ -36,7 +36,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on October 29, 2016.
+   This Internet-Draft will expire on December 23, 2016.
 
 Copyright Notice
 
@@ -53,9 +53,9 @@ Copyright Notice
 
 
 
-Song, et al.            Expires October 29, 2016                [Page 1]
+Song, et al.            Expires December 23, 2016               [Page 1]
 
-Internet-Draft          DNS wire-format over HTTP             April 2016
+Internet-Draft          DNS wire-format over HTTP              June 2016
 
 
    the Trust Legal Provisions and are provided without warranty as
@@ -66,11 +66,12 @@ Table of Contents
    1.  Introduction  . . . . . . . . . . . . . . . . . . . . . . . .   2
    2.  Methodology and Configuration . . . . . . . . . . . . . . . .   3
    3.  DNS-over-HTTP Message Format  . . . . . . . . . . . . . . . .   4
-     3.1.  Start-line  . . . . . . . . . . . . . . . . . . . . . . .   5
-     3.2.  Header Fields . . . . . . . . . . . . . . . . . . . . . .   6
-     3.3.  Message Body  . . . . . . . . . . . . . . . . . . . . . .   6
+     3.1.  Request Method  . . . . . . . . . . . . . . . . . . . . .   4
+     3.2.  Response Status Code  . . . . . . . . . . . . . . . . . .   5
+     3.3.  Header Fields . . . . . . . . . . . . . . . . . . . . . .   6
+     3.4.  Message Body  . . . . . . . . . . . . . . . . . . . . . .   6
    4.  Security Considerations . . . . . . . . . . . . . . . . . . .   7
-   5.  IANA considerations . . . . . . . . . . . . . . . . . . . . .   8
+   5.  IANA considerations . . . . . . . . . . . . . . . . . . . . .   7
    6.  Acknowledgments . . . . . . . . . . . . . . . . . . . . . . .   8
    7.  References  . . . . . . . . . . . . . . . . . . . . . . . . .   8
    Authors' Addresses  . . . . . . . . . . . . . . . . . . . . . . .   9
@@ -84,7 +85,7 @@ Table of Contents
    DNS transport.  These approaches are summarized in [draft-shane-
    review-DNS-over-http].
 
-   One of alternative way of DNS described in that document is to
+   One of alternative way of using DNS described in that document is to
    transport DNS binary data inside HTTP, with the goal of improving DNS
    service availability.  The DNS traffic is simply sent as web traffic
    using port 80/443 over HTTP.  It can bypass badly behaving middle
@@ -108,10 +109,9 @@ Table of Contents
 
 
 
-
-Song, et al.            Expires October 29, 2016                [Page 2]
+Song, et al.            Expires December 23, 2016               [Page 2]
 
-Internet-Draft          DNS wire-format over HTTP             April 2016
+Internet-Draft          DNS wire-format over HTTP              June 2016
 
 
    means that DNS over HTTP is slightly more "stealthy" than a VPN, in
@@ -165,9 +165,9 @@ Internet-Draft          DNS wire-format over HTTP             April 2016
 
 
 
-Song, et al.            Expires October 29, 2016                [Page 3]
+Song, et al.            Expires December 23, 2016               [Page 3]
 
-Internet-Draft          DNS wire-format over HTTP             April 2016
+Internet-Draft          DNS wire-format over HTTP              June 2016
 
 
    In this scenario there is a DNS-HTTP proxy sitting between stub-
@@ -208,81 +208,61 @@ Internet-Draft          DNS wire-format over HTTP             April 2016
 
 3.  DNS-over-HTTP Message Format
 
-   Although this document simply proposes that HTTP be used for DNS
-   massage exchange, it is informative to explore the context with HTTP-
-   specific semantics, such as the HTTP request method, specific
-   request-target, HTTP-version, and HTTP header field, all of which
-   have impact on interoperability as well as performance.
+   DNS over HTTP is not tied to a specific version of HTTP, and should
+   work with HTTP 1.1 [RFC7230] and HTTP/2 [RFC7540].  This section
+   describes the details of the DNS over HTTP message format.
 
-   In HTTP 1.1 specification section 3 in RFC 7230 [RFC7230], an HTTP
-   message consists of three parts: start-line, header fields, and
-   message body with an empty line between header fields and message
-   body.  The DNS over HTTP message also contains these parts.
+3.1.  Request Method
 
+   A DNS message is sent over HTTP from the client to the server via a
+   properly-formed HTTP request.  This is a POST method request [section
+   4.3.3 in RFC 7231 [RFC7231]].  If a GET method request is sent to the
 
 
-Song, et al.            Expires October 29, 2016                [Page 4]
+
+
+Song, et al.            Expires December 23, 2016               [Page 4]
 
-Internet-Draft          DNS wire-format over HTTP             April 2016
+Internet-Draft          DNS wire-format over HTTP              June 2016
 
 
-3.1.  Start-line
+   server, it optionally returns a human-readable page showing
+   information targeted at users.
 
-   By definition the HTTP start-line is either a request-line (for
-   requests) or a status-line (for responses).  A request-line consists
-   of the request method, request-target, and HTTP-version with a CRLF
-   in the end.
-
-   For a DNS query over HTTP, the request is always POST [section 4.3.3
-   in RFC 7230 [RFC7230]].  If a GET is sent to the server, it
-   optionally returns a human-readable page showing its web server
-   environment.
-
-   - Note that choosing POST (not GET) as the request method for DNS
+   Note that choosing POST (and not GET) as the request method for DNS
    wire-format over HTTP is mainly based on two reasons.  One is that
    the protocol is designed using HTTP as a tunnel-like technology
    carrying data from one side to another, not a web service with
    RESTful framework.  Another is that from the view of implementation
-   some servers may ignore undefined entity-body if using GET; and HTTP
-   libs vary on supporting GET with payload.
+   some servers or middleboxes may ignore an undefined entity-body if
+   using GET; and HTTP libraries have varying support for using GET with
+   a payload.
 
-   Usually the target URI is provides explicitly by the services
-   provider.  Derived from the target URI, the request-target in
-   request-line identifies the target resource upon which to apply the
-   request.  To avoid URI conflicts and enhance interoperability, a
-   well-known URI is necessary to allow interoperability.  As defined in
-   RFC 5785 [RFC5785], it begins with the characters "/.well-known/" and
-   the name "dns-wireformat".  So the request-target for DNS wire-format
-   over HTTP SHOULD be '/.well-known/dns-wireformat'.
+   The target URI is provided explicitly by the services provider.
+   Derived from the target URI, the request-target in request-line
+   identifies the target resource upon which to apply the request.  To
+   avoid URI conflicts and enhance interoperability, DNS wire-format
+   over HTTP uses a well-known URI.  As defined in RFC 5785 [RFC5785],
+   it begins with the characters "/.well-known/" and the name "dns-
+   wireformat".  So the request-target for DNS wire-format over HTTP
+   SHOULD be '/.well-known/dns-wireformat'.
 
-   DNS transaction over HTTP has no specific requirement for transport
-   protocol; developers can use any version of HTTP to accomplish the
-   transaction.  But developers should be aware that HTTP/1.1 RFC 7230
-   [RFC7230] and HTTP/2 RFC 7540 [RFC7540] do have differences in
-   performance regarding multiplexing.  HTTP/2 is fully multiplexed,
-   instead of ordered and blocking.  Because there is a general desire
-   to achieve similar performance with DNS over UDP, the modern HTTP/2
-   is preferred for DNS over HTTP implementation.  Note that there
-   should be no problem for advanced HTTP protocol in the future
-   deployed for DNS over HTTP.
+   A DNS transaction over HTTP has no specific requirements for the
+   transport protocol; developers can use any version of HTTP to
+   accomplish the transaction.  But developers should be aware that HTTP
+   1.1 [RFC7230] and HTTP/2 [RFC7540] do have differences in performance
+   regarding multiplexing.  HTTP/2 is fully multiplexed, instead of
+   ordered and blocking.  Because there is a general desire to achieve
+   similar performance with DNS over UDP, the modern HTTP/2 is preferred
+   for DNS over HTTP implementation.  Note that there should be no
+   problem for advanced HTTP protocol in the future deployed for DNS
+   over HTTP.
 
-   As an example, given HTTP-version is "HTTP/1.1", the request-line is
-   :
+3.2.  Response Status Code
 
-   POST /.well-known/dns-wireformat HTTP/1.1
-
-   The status-line returns the status-code [Section 6 of RFC 7231
-   [RFC7231]], which only reflects status of HTTP connection.  If the
-   request has succeeded, the status-line is:
-
-
-
-Song, et al.            Expires October 29, 2016                [Page 5]
-
-Internet-Draft          DNS wire-format over HTTP             April 2016
-
-
-   HTTP/1.1 200 OK
+   The status code [Section 6 of [RFC7231]], only reflects the status of
+   the HTTP connection.  If the request has succeeded, the status code
+   is 200 (OK).
 
    If the request fails, the proxy server will supply an appropriate
    error code, typically 4xx (client error) if the client has provided a
@@ -290,13 +270,25 @@ Internet-Draft          DNS wire-format over HTTP             April 2016
    (server error) if some server-side problem prevented a query from
    succeeding.
 
-3.2.  Header Fields
+   To be clear, a failure on the DNS side should result in a status code
+   of 200 (OK) as long as the HTTP request is valid and can be answered.
+   The DNS error will be returned via the encapsulated DNS message.
+
+
+
+
+Song, et al.            Expires December 23, 2016               [Page 5]
+
+Internet-Draft          DNS wire-format over HTTP              June 2016
+
+
+3.3.  Header Fields
 
    By definition header fields are key:value pairs that can be used to
    communicate data about the message, its payload, the target resource,
    or the connection (for example control data).
 
-   The Content-Type: header should be set to "application/dns-
+   The Content-Type: header field should be set to "application/dns-
    wireformat".
 
    We add one a new header field:
@@ -307,8 +299,7 @@ Internet-Draft          DNS wire-format over HTTP             April 2016
    how it received the underlying DNS query, and which the server will
    use when sending the query to the far-end DNS server.  This means if
    a stub DNS client asks for TCP, then that's what the far-end DNS
-   server will see, and likewise for UDP.  This header field is used for
-   both request and response, for all DNS over HTTP message.
+   server will see, and likewise for UDP.
 
    Exposing the transport protocol of the query allows the HTTP server
    proxy to send DNS queries to the recursive resolver that look like
@@ -318,35 +309,35 @@ Internet-Draft          DNS wire-format over HTTP             April 2016
    instead of requiring that the HTTP client proxy somehow manage that
    functionality.
 
-   For a stub resolver that connect directly via HTTP to the HTTP server
-   proxy then this flag should be set to TCP, as the entire response can
-   always be delivered so truncation is never required.
+   For a stub resolver that connects directly via HTTP to the HTTP
+   server proxy then this flag should be set to TCP, as the entire
+   response can always be delivered so truncation is never required.
 
    The client MUST include this option.  If it is missing then it is an
    error and the server should respond with HTTP code 400 (bad request).
 
-3.3.  Message Body
+3.4.  Message Body
 
    As mentioned, the message body is DNS wire-format data.  It is worth
    mentioning that DNS messages sent over TCP connections is prefixed
-   with a two-byte length field which gives the message length[section
-
-
-
-Song, et al.            Expires October 29, 2016                [Page 6]
-
-Internet-Draft          DNS wire-format over HTTP             April 2016
-
-
+   with a two-byte length field which gives the message length [section
    4.2.2 in RFC 1035 [RFC1035]], excluding the two-byte length field.
    This length field allows the low-level processing to assemble a
    complete message before beginning to parse it.  In the context of
-   HTTP, there is content-length header field [section 3.3.2 in RFC 7230
+   HTTP, there is content-length header field [section 3.3.2 in
    [RFC7230]]in which the field-value is the same with two bytes length
    field in DNS over TCP.
 
    Since this two-byte length field is redundant, when the client proxy
    receives a DNS message over TCP, it MUST NOT include the length field
+
+
+
+Song, et al.            Expires December 23, 2016               [Page 6]
+
+Internet-Draft          DNS wire-format over HTTP              June 2016
+
+
    in the message sent to the server.  The length in the content-length
    header is only the size of the DNS message itself, and MUST NOT
    include this two-byte length header.
@@ -383,17 +374,6 @@ Internet-Draft          DNS wire-format over HTTP             April 2016
    creating a more standardized way of doing this it may cause
    operational problems for enterprise administrators.
 
-
-
-
-
-
-
-Song, et al.            Expires October 29, 2016                [Page 7]
-
-Internet-Draft          DNS wire-format over HTTP             April 2016
-
-
 5.  IANA considerations
 
    Registration for a new Media Type: dns-wireformat
@@ -402,9 +382,21 @@ Internet-Draft          DNS wire-format over HTTP             April 2016
 
    Registration for a new Well-Known URI: "dns-wireformat"
 
+
+
+
+
+
+
+
+Song, et al.            Expires December 23, 2016               [Page 7]
+
+Internet-Draft          DNS wire-format over HTTP              June 2016
+
+
 6.  Acknowledgments
 
-   Thanks to Bob Harold and Paul Hoffman for review.
+   Thanks to Bob Harold, Paul Hoffman, and Julian Reschke for review.
 
 7.  References
 
@@ -441,15 +433,6 @@ Internet-Draft          DNS wire-format over HTTP             April 2016
               BCP 152, RFC 5625, DOI 10.17487/RFC5625, August 2009,
               <http://www.rfc-editor.org/info/rfc5625>.
 
-
-
-
-
-Song, et al.            Expires October 29, 2016                [Page 8]
-
-Internet-Draft          DNS wire-format over HTTP             April 2016
-
-
    [RFC5785]  Nottingham, M. and E. Hammer-Lahav, "Defining Well-Known
               Uniform Resource Identifiers (URIs)", RFC 5785,
               DOI 10.17487/RFC5785, April 2010,
@@ -459,6 +442,13 @@ Internet-Draft          DNS wire-format over HTTP             April 2016
               Protocol (HTTP/1.1): Message Syntax and Routing",
               RFC 7230, DOI 10.17487/RFC7230, June 2014,
               <http://www.rfc-editor.org/info/rfc7230>.
+
+
+
+Song, et al.            Expires December 23, 2016               [Page 8]
+
+Internet-Draft          DNS wire-format over HTTP              June 2016
+
 
    [RFC7231]  Fielding, R., Ed. and J. Reschke, Ed., "Hypertext Transfer
               Protocol (HTTP/1.1): Semantics and Content", RFC 7231,
@@ -495,17 +485,6 @@ Authors' Addresses
    URI:   http://www.redbarn.org/
 
 
-
-
-
-
-
-
-Song, et al.            Expires October 29, 2016                [Page 9]
-
-Internet-Draft          DNS wire-format over HTTP             April 2016
-
-
    Shane Kerr
    Beijing Internet Institute
    2/F, Building 5, No.58 Jinghai Road, BDA
@@ -514,6 +493,17 @@ Internet-Draft          DNS wire-format over HTTP             April 2016
 
    Email: shane@biigroup.cn
    URI:   http://www.biigroup.com/
+
+
+
+
+
+
+
+
+Song, et al.            Expires December 23, 2016               [Page 9]
+
+Internet-Draft          DNS wire-format over HTTP              June 2016
 
 
    Runxia Wan
@@ -557,4 +547,14 @@ Internet-Draft          DNS wire-format over HTTP             April 2016
 
 
 
-Song, et al.            Expires October 29, 2016               [Page 10]
+
+
+
+
+
+
+
+
+
+
+Song, et al.            Expires December 23, 2016              [Page 10]
