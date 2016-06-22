@@ -5,15 +5,15 @@
 Internet Engineering Task Force                                  L. Song
 Internet-Draft                                Beijing Internet Institute
 Intended status: Experimental                                   P. Vixie
-Expires: December 23, 2016                                          TISF
+Expires: December 24, 2016                                          TISF
                                                                  S. Kerr
                                                                   R. Wan
                                               Beijing Internet Institute
-                                                           June 21, 2016
+                                                           June 22, 2016
 
 
                        DNS wire-format over HTTP
-                   draft-song-dns-wireformat-http-03
+                   draft-song-dns-wireformat-http-04
 
 Abstract
 
@@ -36,7 +36,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on December 23, 2016.
+   This Internet-Draft will expire on December 24, 2016.
 
 Copyright Notice
 
@@ -53,7 +53,7 @@ Copyright Notice
 
 
 
-Song, et al.            Expires December 23, 2016               [Page 1]
+Song, et al.            Expires December 24, 2016               [Page 1]
 
 Internet-Draft          DNS wire-format over HTTP              June 2016
 
@@ -109,7 +109,7 @@ Table of Contents
 
 
 
-Song, et al.            Expires December 23, 2016               [Page 2]
+Song, et al.            Expires December 24, 2016               [Page 2]
 
 Internet-Draft          DNS wire-format over HTTP              June 2016
 
@@ -165,7 +165,7 @@ Internet-Draft          DNS wire-format over HTTP              June 2016
 
 
 
-Song, et al.            Expires December 23, 2016               [Page 3]
+Song, et al.            Expires December 24, 2016               [Page 3]
 
 Internet-Draft          DNS wire-format over HTTP              June 2016
 
@@ -221,7 +221,7 @@ Internet-Draft          DNS wire-format over HTTP              June 2016
 
 
 
-Song, et al.            Expires December 23, 2016               [Page 4]
+Song, et al.            Expires December 24, 2016               [Page 4]
 
 Internet-Draft          DNS wire-format over HTTP              June 2016
 
@@ -277,7 +277,7 @@ Internet-Draft          DNS wire-format over HTTP              June 2016
 
 
 
-Song, et al.            Expires December 23, 2016               [Page 5]
+Song, et al.            Expires December 24, 2016               [Page 5]
 
 Internet-Draft          DNS wire-format over HTTP              June 2016
 
@@ -333,7 +333,7 @@ Internet-Draft          DNS wire-format over HTTP              June 2016
 
 
 
-Song, et al.            Expires December 23, 2016               [Page 6]
+Song, et al.            Expires December 24, 2016               [Page 6]
 
 Internet-Draft          DNS wire-format over HTTP              June 2016
 
@@ -389,7 +389,7 @@ Internet-Draft          DNS wire-format over HTTP              June 2016
 
 
 
-Song, et al.            Expires December 23, 2016               [Page 7]
+Song, et al.            Expires December 24, 2016               [Page 7]
 
 Internet-Draft          DNS wire-format over HTTP              June 2016
 
@@ -445,7 +445,7 @@ Internet-Draft          DNS wire-format over HTTP              June 2016
 
 
 
-Song, et al.            Expires December 23, 2016               [Page 8]
+Song, et al.            Expires December 24, 2016               [Page 8]
 
 Internet-Draft          DNS wire-format over HTTP              June 2016
 
@@ -501,7 +501,7 @@ Authors' Addresses
 
 
 
-Song, et al.            Expires December 23, 2016               [Page 9]
+Song, et al.            Expires December 24, 2016               [Page 9]
 
 Internet-Draft          DNS wire-format over HTTP              June 2016
 
@@ -557,4 +557,4 @@ Internet-Draft          DNS wire-format over HTTP              June 2016
 
 
 
-Song, et al.            Expires December 23, 2016              [Page 10]
+Song, et al.            Expires December 24, 2016              [Page 10]
