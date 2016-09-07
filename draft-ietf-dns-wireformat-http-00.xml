@@ -1,0 +1,483 @@
+<?xml version="1.0"?>
+<!-- This template is for creating an Internet Draft using xml2rfc,
+     which is available here: http://xml.resource.org. -->
+<!DOCTYPE rfc SYSTEM "rfc2629.dtd" [
+<!-- One method to get references from the online citation libraries.
+     There has to be one entity for each item to be referenced.
+     An alternate method (rfc include) is described in the references. -->
+
+<!ENTITY RFC1035 SYSTEM "http://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.1035.xml">
+<!ENTITY RFC5246 SYSTEM "http://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.5246.xml">
+<!ENTITY RFC5625 SYSTEM "http://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.5625.xml">
+<!ENTITY RFC5785 SYSTEM "http://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.5785.xml">
+<!ENTITY RFC7230 SYSTEM "http://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.7230.xml">
+<!ENTITY RFC7231 SYSTEM "http://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.7231.xml">
+<!ENTITY RFC7540 SYSTEM "http://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.7540.xml">
+<!ENTITY I-D.bortzmeyer-dns-json SYSTEM "http://xml2rfc.ietf.org/public/rfc/bibxml3/reference.I-D.draft-bortzmeyer-dns-json-01.xml">
+<!ENTITY I-D.mohan-dns-query-xml SYSTEM "http://xml2rfc.ietf.org/public/rfc/bibxml3/reference.I-D.draft-mohan-dns-query-xml-00.xml">
+<!ENTITY I-D.ietf-dnsop-5966bis SYSTEM "http://xml2rfc.ietf.org/public/rfc/bibxml3/reference.I-D.draft-ietf-dnsop-5966bis-04.xml">
+]>
+<?xml-stylesheet type='text/xsl' href='rfc2629.xslt' ?>
+<!-- used by XSLT processors -->
+<!-- For a complete list and description of processing instructions (PIs),
+     please see http://xml.resource.org/authoring/README.html. -->
+<!-- Below are generally applicable Processing Instructions (PIs) that most I-Ds might want to use.
+     (Here they are set differently than their defaults in xml2rfc v1.32) -->
+<?rfc strict="yes" ?>
+<!-- give errors regarding ID-nits and DTD validation -->
+<!-- control the table of contents (ToC) -->
+<?rfc toc="yes"?>
+<?rfc tocappendix="yes"?>
+<!-- generate a ToC -->
+<?rfc tocdepth="3"?>
+<!-- the number of levels of subsections in ToC. default: 3 -->
+<!-- control references -->
+<?rfc symrefs="yes"?>
+<!-- use symbolic references tags, i.e, [RFC2119] instead of [1] -->
+<?rfc sortrefs="yes" ?>
+<!-- sort the reference entries alphabetically -->
+<!-- control vertical white space
+     (using these PIs as follows is recommended by the RFC Editor) -->
+<?rfc compact="yes" ?>
+<!-- do not start each main section on a new page -->
+<?rfc subcompact="no" ?>
+<!-- keep one blank line between list items -->
+<!-- end of list of popular I-D processing instructions -->
+<?rfc comments="no" ?>
+<?rfc inline="yes" ?>
+<rfc category="exp" docName="draft-ietf-dns-wireformat-http-00" ipr="trust200902">
+
+  <front>
+
+    <title>DNS wire-format over HTTP</title>
+
+    <author fullname="Linjian Song" initials="L." surname="Song">
+      <organization>Beijing Internet Institute</organization>
+      <address>
+        <postal>
+          <street>2508 Room, 25th Floor, Tower A, Time Fortune</street>
+          <city>Beijing</city>
+          <region></region>
+          <code>100028</code>
+          <country>P. R. China</country>
+        </postal>
+        <email>songlinjian@gmail.com</email>
+        <uri>http://www.biigroup.com/</uri>
+      </address>
+    </author>
+
+    <author fullname="Paul Vixie" initials="P." surname="Vixie">
+      <organization>TISF</organization>
+      <address>
+        <postal>
+        <street>11400 La Honda Road</street>
+        <city>Woodside</city>
+        <region>California</region>
+        <code>94062</code>
+        <country>US</country>
+      </postal>
+      <email>vixie@tisf.net</email>
+      <uri>http://www.redbarn.org/</uri>
+      </address>
+    </author>
+
+    <author fullname="Shane Kerr" initials="S." surname="Kerr">
+      <organization>Beijing Internet Institute</organization>
+      <address>
+        <postal>
+          <street>2/F, Building 5, No.58 Jinghai Road, BDA</street>
+          <city>Beijing</city>
+          <code>100176</code>
+          <country>CN</country>
+        </postal>
+        <email>shane@biigroup.cn</email>
+        <uri>http://www.biigroup.com/</uri>
+      </address>
+    </author>
+
+    <author fullname="Runxia Wan" initials="R." surname="Wan">
+      <organization>Beijing Internet Institute</organization>
+      <address>
+        <postal>
+          <street>2508 Room, 25th Floor, Tower A, Time Fortune</street>
+          <city>Beijing</city>
+          <region></region>
+          <code>100028</code>
+          <country>P. R. China</country>
+        </postal>
+        <email>rxwan@biigroup.cn</email>
+        <uri>http://www.biigroup.com/</uri>
+      </address>
+    </author>
+    <date/>
+
+
+    <!-- Meta-data Declarations -->
+
+    <area>Internet Area</area>
+    <workgroup>Internet Engineering Task Force</workgroup>
+
+    <!-- <keyword>dns</keyword> -->
+
+    <abstract>
+      <t>
+      This memo introduces a way to tunnel DNS data over HTTP. This
+      may be useful in any situation where DNS is not working
+      properly, such as when there is middlebox misbehavior.
+      </t>
+
+    </abstract>
+
+  </front>
+
+  <middle>
+
+    <section title="Introduction">
+    
+    <t><xref target="RFC1035">RFC 1035</xref> specifies the wire
+      format for DNS messages.  It also specifies DNS transport on UDP
+      and TCP on port 53, which is still used today. However, there
+      are other ways to access DNS database, for example in a
+      different data format or via alternative DNS transport. These
+      approaches are summarized in
+      [draft-shane-review-DNS-over-http].</t>
+
+    <t>One of alternative way of using DNS described in that document is to
+      transport DNS binary data inside HTTP, with the goal of
+      improving DNS service availability. The DNS traffic is simply
+      sent as web traffic using port 80/443 over HTTP. It can bypass
+      badly behaving middle boxes like firewalls, proxies or traffic
+      shaping devices on path which might interfere with normal DNS
+      traffic <xref target="RFC5625"/> <xref target="DOTSE"/> <xref
+      target="SAC035"/>.
+    </t>
+
+    <t>This approach has the advantage that HTTP usually makes it through 
+      even the worst coffee shop or hotel room firewalls, as Internet
+      users expect web browsing to always work. It also benefits from
+      HTTP's support for persistent TCP connections (see section 6.3
+      in <xref target="RFC7230"/>). Note that <xref
+      target="I-D.ietf-dnsop-5966bis">5966bis</xref> specifies the
+      persistent feature for DNS on TCP port 53, but current DNS
+      software does not generally support this mode of operation.
+      Finally, HTTPS provides data integrity and privacy.
+    </t>
+
+    <t>One alternative idea is to simply use a VPN, rather than a
+       custom protocol for this purpose. While this is possible, the
+       DNS over HTTP wire format protocol presented here works on an
+       actual HTTP server, so it can be hosted on a machine that also
+       serves web pages. This means that DNS over HTTP is slightly
+       more "stealthy" than a VPN, in that it can be indistinguishable
+       from normal web traffic.
+     </t>
+
+    <t>Unlike a REST DNS API using JSON <xref target="I-D.bortzmeyer-dns-json"/>
+        or XML <xref target="I-D.mohan-dns-query-xml"/> encoding for
+        DNS data, in this approach wire-format data is wrapped with a
+        HTTP header and transmitted on port 80 or 443. The protocol is 
+        intended to serve as a sort of DNS VPN, and does not introduce 
+        another format of DNS data. It is also possible as a new 
+        DNS APIs for advanced usage in application development. For example, 
+        web developers can create arbitrary HTTP/HTTPS queries and get DNS 
+        responses in their JavaScript apps.
+       </t>
+
+      <t>This memo aims to describe how the DNS binary over HTTP
+        concept works. Hopefully implementations by different
+        developers following this memo can speak with each other.
+      </t>
+
+      <t>This mechanism is designed for client stub resolver to
+        recursive server. DNS zone transfer, DNS updates, and anything
+        other than simple DNS queries are out-of-scope for this
+        document.
+      </t>
+
+    </section>
+
+    <section title="Methodology and Configuration">
+
+      <t>As mentioned in introduction, the basic methodology is
+        wrapping the DNS wire-format data into an HTTP header and
+        transmitting on port 80 or 443. However, there are two
+        different scenarios for implementation.</t>
+
+      <t>Scenario 1:</t>
+
+      <t>The DNS server implementation handles DNS queries and
+        responses via both UDP and TCP on port 53, and HTTP on port 80
+        or 443. It works as follows:</t>
+      <t><list style="numbers">
+        <t>The client creates a DNS query message.</t>
+        <t>The client encapsulates the DNS message in a HTTP
+           message body and assigns parameters with the HTTP
+           header.</t>
+        <t>The client connects to the server and issues an HTTP
+           POST request method. This may re-use an existing HTTP
+           connection.</t>
+        <t>The server decapsulates the HTTP packet to get the DNS
+           query, and resolves the DNS query.</t>
+        <t>The server encapsulates the DNS response in HTTP and
+           sends it back via the HTTP session.</t>
+      </list>
+      </t>
+      <t>Scenario 2:</t>
+
+      <t>In this scenario there is a DNS-HTTP proxy sitting between
+        stub-resolver and the recursive server. The stub uses a client
+        proxy and the recursive server uses a server proxy. This works
+        like a DNS VPN and transmits wire-format DNS messages over
+        HTTP between the proxy client and a server, as follows:</t>
+      <t><list style="numbers">
+        <t>The stub-resolver sends a DNS query (over UDP or TCP) to
+           the proxy client.</t>
+        <t>The proxy client encapsulates the DNS message in an HTTP
+           message body and assigns parameters with the HTTP header.</t>
+        <t>The proxy client connects to the proxy server and issues an
+           HTTP POST request method. This may re-use an existing HTTP
+           connection.</t>
+        <t>The proxy server decapsulates the HTTP packet to get the
+           DNS query, and sends it to a real DNS server over UDP/TCP.</t>
+        <t>The proxy server encapsulates the DNS response in HTTP and
+           sends it back via the HTTP session.</t>
+        <t>The proxy client decapsulates the DNS message from the HTTP
+          response and sends it back to the stub-resolver via previous
+          DNS session (either UDP or TCP).</t>
+      </list>
+       </t>
+
+      <t>It is possible that these scenarios are mixed. The server may
+         speak DNS over HTTP directly and the client use a proxy, or
+         the other way around.</t>
+
+      <t>Note that the proxy client can be implemented listening to a
+        loop-back address in the same host with stub-resolver. The
+        proxy server can be implemented as a caching server as well.
+        It is also possible to use the proxy server as a regular web
+        server at the same time that is acting as a proxy
+        server.</t>
+
+    </section>
+
+    <section title="DNS-over-HTTP Message Format">
+
+      <t>DNS over HTTP is not tied to a specific version of HTTP, and should work with
+        <xref target="RFC7230">HTTP 1.1</xref> and <xref target="RFC7540">HTTP/2</xref>.
+        This section describes the details of the DNS over HTTP message format.
+      </t>
+
+     <section title="Request Method">
+
+      <t>A DNS message is sent over HTTP from the client to the server
+        via a properly-formed HTTP request.  This is a POST method
+        request [section 4.3.3 in <xref target="RFC7231">RFC
+        7231</xref>]. If a GET method request is sent to the server,
+        it optionally returns a human-readable page showing
+        information targeted at users.
+      </t>
+
+      <t>Note that choosing POST (and not GET) as the request
+        method for DNS wire-format over HTTP is mainly based on two
+        reasons. One is that the protocol is designed using HTTP as a
+        tunnel-like technology carrying data from one side to another,
+        not a web service with RESTful framework. Another is that from
+        the view of implementation some servers or middleboxes may
+        ignore an undefined entity-body if using GET; and HTTP
+        libraries have varying support for using GET with a payload.
+      </t>
+
+      <t>The target URI is provided explicitly by the services provider. Derived
+        from the target URI, the request-target in request-line identifies the target
+        resource upon which to apply the request. To avoid URI conflicts and enhance 
+        interoperability, DNS wire-format over HTTP uses a well-known URI. As defined in 
+        <xref target="RFC5785">RFC 5785</xref>, it begins with the characters "/.well-known/" 
+        and the name "dns-wireformat". So the request-target for DNS wire-format over HTTP SHOULD
+        be '/.well-known/dns-wireformat'.
+      </t>
+
+      <t>
+        A DNS transaction over HTTP has no specific requirements for the transport protocol;
+        developers can use any version of HTTP to accomplish the transaction. But developers 
+        should be aware that HTTP 1.1 <xref target="RFC7230"/> and HTTP/2 
+        <xref target="RFC7540"/> do have differences in performance regarding 
+        multiplexing. HTTP/2 is fully multiplexed, instead of ordered and blocking. Because 
+        there is a general desire to achieve similar performance with DNS over UDP, the modern 
+        HTTP/2 is preferred for DNS over HTTP implementation. Note that there should be no 
+        problem for advanced HTTP protocol in the future deployed for DNS over HTTP.
+      </t>
+
+     </section> <!-- Request  Method -->
+
+     <section title="Response Status Code">
+      <t>The status code [Section 6 of <xref target="RFC7231"/>], only
+         reflects the status of the HTTP connection. If the request
+         has succeeded, the status code is 200 (OK).
+      </t>
+
+      <t>If the request fails, the proxy server will supply an
+         appropriate error code, typically 4xx (client error) if the
+         client has provided a query that the server cannot understand
+         for some reasons, or 5xx (server error) if some server-side
+         problem prevented a query from succeeding.
+      </t>
+
+      <t>To be clear, a failure on the DNS side should result in a
+         status code of 200 (OK) as long as the HTTP request is valid
+         and can be answered. The DNS error will be returned via the
+         encapsulated DNS message.
+      </t>
+     </section> <!-- Response Status Code -->
+
+     <section title="Header Fields">
+
+      <t>By definition header fields are key:value pairs that can be used to communicate 
+        data about the message, its payload, the target resource, or
+        the connection (for example control data).</t>
+
+      <t>The Content-Type: header field should be set to "application/dns-wireformat".
+      </t>
+
+      <t>We add one a new header field: </t>
+
+        <t>Proxy-DNS-Transport: xyz</t>
+
+        <t>Where xyz is either UDP or TCP, which is the client's indication of how it 
+          received the underlying DNS query, and which the server will use when sending 
+          the query to the far-end DNS server. This means if a stub DNS client asks for 
+          TCP, then that's what the far-end DNS server will see, and likewise for UDP. 
+        </t>
+
+        <t>Exposing the transport protocol of the query allows the
+           HTTP server proxy to send DNS queries to the recursive
+           resolver that look like those that the DNS client is
+           sending to the client proxy. If the stub resolver sent a
+           UDP packet, then this allows the recursive resolver to
+           implement the logic of truncating the packet properly,
+           instead of requiring that the HTTP client proxy somehow
+           manage that functionality.
+        </t>
+
+        <t>For a stub resolver that connects directly via HTTP to the
+           HTTP server proxy then this flag should be set to TCP, as the
+           entire response can always be delivered so truncation is
+           never required.
+        </t>
+
+        <t>The client MUST include this option. If it is missing then
+           it is an error and the server should respond with HTTP code
+           400 (bad request).
+        </t>
+
+      </section> <!-- Header Fields -->
+
+
+      <section title="Message Body">
+
+      <t>As mentioned, the message body is DNS wire-format data. It is worth mentioning 
+        that DNS messages sent over TCP connections is prefixed with 
+        a two-byte length field which gives the message length [section 4.2.2 in <xref target="RFC1035">RFC 1035</xref>], 
+        excluding the two-byte length field. This length field allows the low-level processing 
+        to assemble a complete message before beginning to parse it. In the context of HTTP, 
+        there is content-length header field [section 3.3.2 in <xref target="RFC7230"/>]in which the field-value
+        is the same with two bytes length field in DNS over TCP. </t>
+
+      <t>Since this two-byte length field is redundant, when the
+         client proxy receives a DNS message over TCP, it MUST NOT
+         include the length field in the message sent to the server.
+         The length in the content-length header is only the size of
+         the DNS message itself, and MUST NOT include this two-byte
+         length header.
+      </t>
+
+      </section> 
+      </section>
+
+  <section title="Security Considerations">
+      <t>This protocol does not introduce any new security
+      considerations since it is built on the DNS and HTTP protocols.
+      </t>
+
+      <t>Since this protocol transmits DNS messages, all of the
+      security concerns that stub resolvers and recursive resolvers
+      have with DNS messages apply. However, since HTTP uses TCP as
+      the underlying protocol, DNS reflection or amplification attacks
+      are not possible.</t>
+
+      <t>Since HTTP is used, all of the security concerns of HTTP are
+      also present.</t>
+
+      <t>Servers and clients SHOULD use TLS for communication. It
+      provides privacy and integrity for HTTP sessions. If TLS is
+      used, then all of the security concerns of TLS are also
+      present.</t>
+
+      <t>As specified in  <xref target="RFC5246">RFC 5246</xref>, both
+      the HTTP server and client can be authenticated or not
+      authenticated. Clients SHOULD authenticate the certificate of
+      the HTTP server they connect to. The DNS service providers can
+      decide whether to authenticate the client side based on their
+      own requirement for security and privacy. For example, clients
+      of an open resolver do not require authentication.</t>
+
+      <t>Note that the ability to perform DNS queries in this way may
+      allow users to bypass local DNS policy. This is problematic in
+      any environment where administrators need to enforce specific
+      DNS behavior, such as an enterprise environment. The protocol
+      outlined here does not introduce any new capabilities in this
+      area, but by creating a more standardized way of doing this it
+      may cause operational problems for enterprise
+      administrators.</t>
+    
+    </section>
+
+
+    <section title="IANA considerations">
+      <t>Registration for a new Media Type: dns-wireformat</t>
+
+      <t>Registration for a new HTTP header field: Proxy-DNS-Transport</t>
+
+      <t>Registration for a new Well-Known URI: "dns-wireformat"</t>
+
+    
+    </section>
+
+  <section title="Acknowledgments">
+    <t>
+    Thanks to Bob Harold, Paul Hoffman, and Julian Reschke for review.
+    </t>
+  </section> <!-- Acknowledgments -->
+  
+  </middle>
+
+  <back>
+
+    <references title="References">
+      &RFC1035; &RFC5246; &RFC5625;&RFC5785;&RFC7230; &RFC7231;&RFC7540;
+      &I-D.ietf-dnsop-5966bis;
+      &I-D.bortzmeyer-dns-json;&I-D.mohan-dns-query-xml;
+
+     
+     <reference anchor="DOTSE" target="http://www.iis.se/docs/Routertester_en.pdf">
+          <front>
+                  <title>DNSSEC Tests of Consumer Broadband Routers</title>
+      <author fullname="Ahlund"></author>
+      <author fullname="Wallstrom" ></author>
+      <date year="2008" month="February" />            
+          </front>
+     </reference>
+
+       <reference anchor="SAC035">
+            <front>
+                <title>DNSSEC Impact on Broadband Routers and Firewalls </title>
+                <author>
+                    <organization>ICANN Security and Stability Advisory Committee</organization>
+                </author>
+                <date year="2008" />
+            </front>
+     </reference>
+     </references>
+
+  </back>
+</rfc>
+
