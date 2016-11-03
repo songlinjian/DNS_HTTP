@@ -10,17 +10,18 @@
 <!ENTITY RFC1123 SYSTEM "http://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.1123.xml">
 <!ENTITY RFC3234 SYSTEM "http://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.3234.xml">
 <!ENTITY RFC3542 SYSTEM "http://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.3542.xml">
-<!ENTITY RFC5246 SYSTEM "http://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.5246.xml">
 <!ENTITY RFC5625 SYSTEM "http://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.5625.xml">
 <!ENTITY RFC5681 SYSTEM "http://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.5681.xml">
 <!ENTITY RFC5966 SYSTEM "http://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.5966.xml">
 <!ENTITY RFC6891 SYSTEM "http://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.6891.xml">
 <!ENTITY RFC7230 SYSTEM "http://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.7230.xml">
+<!ENTITY RFC7413 SYSTEM "http://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.7413.xml">
 <!ENTITY RFC7540 SYSTEM "http://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.7540.xml">
-<!ENTITY I-D.dprive-dns-over-tls SYSTEM "http://xml2rfc.ietf.org/public/rfc/bibxml3/reference.I-D.draft-ietf-dprive-dns-over-tls-01.xml">
-<!ENTITY I-D.bortzmeyer-dns-json SYSTEM "http://xml2rfc.ietf.org/public/rfc/bibxml3/reference.I-D.draft-bortzmeyer-dns-json-01.xml">
+<!ENTITY RFC7858 SYSTEM "http://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.7858.xml">
+<!ENTITY RFC7871 SYSTEM "http://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.7871.xml">
+<!ENTITY I-D.dprive-dns-over-tls SYSTEM "http://xml2rfc.ietf.org/public/rfc/bibxml3/reference.I-D.draft-ietf-dprive-dns-over-tls-07.xml">
+<!ENTITY I-D.hoffman-dns-in-json SYSTEM "http://xml2rfc.ietf.org/public/rfc/bibxml3/reference.I-D.draft-hoffman-dns-in-json-10.xml">
 <!ENTITY I-D.mohan-dns-query-xml SYSTEM "http://xml2rfc.ietf.org/public/rfc/bibxml3/reference.I-D.draft-mohan-dns-query-xml-00.xml">
-<!ENTITY I-D.ietf-dnsop-edns-client-subnet SYSTEM "http://xml2rfc.ietf.org/public/rfc/bibxml3/reference.I-D.draft-ietf-dnsop-edns-client-subnet-04.xml">
 
 ]>
 <?xml-stylesheet type='text/xsl' href='rfc2629.xslt' ?>
@@ -55,7 +56,7 @@
 
   <front>
 
-    <title>A review of implementation DNS over port 80/443</title>
+    <title>A review of DNS over port 80/443</title>
 
     <author fullname="Shane Kerr" initials="S." surname="Kerr">
       <organization>Beijing Internet Institute</organization>
@@ -145,15 +146,15 @@
         traffic <xref target="RFC3234"/> <xref target="RFC5625"/>
         <xref target="DOTSE"/> <xref target="SAC035"/>. In addition,
         some ISPs and hotels block external DNS and perform
-        DNS rewriting to send users to advertising pages, or may use
-        IP addresses which cause misleading geographic location for
-        the user <xref target="I-D.ietf-dnsop-edns-client-subnet"/>.
+        DNS rewriting to send users to advertising or other pages that
+        they did intend, or networks may use IP addresses which cause
+        misleading geographic location for the user <xref target="RFC7871"/>.
         Users may want DNSSEC support which is not deployed locally in
         such a case, and so on.
       </t>
       <t>
         Case 2: Users may use DNS over TLS or HTTPS to protect privacy.
-        This also allows the client to authenticate the server.
+        This also allows the DNS client to authenticate the DNS server.
       </t>
       <t>
         Case 3: Developers may want a higher level DNS API. Web developers may
@@ -166,14 +167,14 @@
       This memo does not aim to develop standards or tools. The
       purpose is to review various implementation options as a
       reference for developers. However, it may be helpful for anyone
-      hoping to develop specifications for DNS over 80/443 in the
-      future.
+      hoping to develop specifications or implementations for DNS over
+      80/443.
     </t>
 
     <t>
       Note that most of the implementations described in this memo are
       on port 80/443 and combined with TCP/TLS/HTTP(S). The main focus
-      is between stub resolvers and recursive servers, and the
+      here is between stub resolvers and recursive servers, and the
       discussion is about the stub resolver to recursive server
       communication.
     </t>
@@ -192,7 +193,7 @@
       In this way, the whole protocol is the same as current DNS
       transport in TCP, except the transport port is moved to port 80
       or 443. The difference between port 80 and 443 is that the
-      traffic of port 80 is usually intercepted as HTTP traffic for 
+      traffic of port 80 is often intercepted as HTTP traffic for 
       purposes of deeper inspection, while
       the traffic of port 443 is usually considered to be encrypted,
       and typically ignored by middle-boxes.  One example where
@@ -202,7 +203,7 @@
     </t> 
 
     <t>
-      Transporting DNS through port 80/443 is an easy implementation.
+      Transporting DNS through port 80/443 is easy to implement.
       Developers can simply run an existing DNS server and configure
       the DNS software to listen on ports 80/443.  The client can also
       apply this change without any significant changes.
@@ -219,11 +220,11 @@
     <section title="DNS over TLS on port 443">
     <t>
       Another approach is DNS over TLS on port 443, which is also
-      implemented in DNSSEC trigger. DNS over TLS is documented in
-      <xref target="I-D.ietf-dprive-dns-over-tls"/>, which uses the
-      well-known port 853. Using port 443 to carry the traffic instead
-      still serves the purpose in use case 1, as some middle boxes may
-      block traffic on the port 853.
+      implemented in DNSSEC trigger <xref target="dnssec-trigger"/>.
+      DNS over TLS is documented in <xref target="RFC7858"/>, which
+      uses the well-known port 853. Using port 443 to carry the
+      traffic instead still serves the purpose in use case 1, as some
+      middle boxes may block traffic on the port 853.
       <xref target="I-D.ietf-dprive-dns-over-tls"/> also discusses
       authentication and privacy profiles.
     </t>
@@ -231,17 +232,21 @@
     <t>
       TLS provide many benefits for DNS. First, it significantly
       reduces the DNS conversation's vulnerability to being hijacked.
-      Second, it prevents resolvers from becoming amplifiers of
-      reflection attack. Additionally, it provides privacy by
-      encrypting the conversation between client and server.
+      Second, like plain TCP or DNS Cookies, it prevents resolvers
+      from being used in amplification or reflection attacks.
+      Additionally, it provides privacy by encrypting the conversation
+      between client and server.
     </t>
   
     <t>
       One concern of DNS over TLS is its cost. Compared to UDP,
       DNS-over-TCP requires an additional round-trip-time (RTT) of
-      latency to establish a TCP connection. Use of TLS encryption
-      algorithms adds an additional RTT, and results in slightly
-      higher CPU usage. It should also be considered that the DNS
+      latency to establish a TCP connection (although TCP fast open
+      <xref target="RFC7413"/> may eliminate that in some cases). Use
+      of TLS encryption algorithms adds an additional RTT, and results
+      in slightly higher CPU usage. Keeping a session open may
+      amortize the latency of extra RTT, but at the cost of state on
+      both client and resolver side. Another concern is that the DNS
       packet over TLS on a new port might be dropped by some middle
       boxes. Another concern of TLS is the deployment difficulty when
       authenticating the server. If servers are authenticated,
@@ -258,8 +263,8 @@
       and sending it as HTTP(S) traffic. It is quiet useful in use
       cases 1 &amp; 2 described in the introduction.  This approach
       has the benefit that HTTP usually makes it through even the
-      worst coffee shop or hotel room firewalls, as this expected by
-      Internet users.
+      worst coffee shop or hotel room firewalls, as working web
+      browsing is expected by Internet users.
     </t>
 
     <t>
@@ -321,38 +326,40 @@
       and unpacking uses CPU and may result in higher response time.
       The DNS over HTTP messages also have a risk of being dropped by
       firewalls which intercepts HTTP packets. And it should be noted
-      that if HTTPS is used, then all the discussion of TLS in
-      previous section is also applicable here.
+      that if HTTPS is used, then all the discussion of the costs,
+      benefits, and security recommendations about TLS in previous
+      section is also applicable here.
     </t>
     </section> <!-- "Wire-format DNS over HTTP(S)" -->
 
     <section title="REST HTTP API">
     <t>
       As mentioned in use case 3, one motivation of a REST HTTP API is
-      for web developers who need to get DNS information but cannot
-      create raw requests (for example JavaScript developers). They
-      can work by creating HTTP requests other than real DNS
-      queries.
+      for web developers who need to get DNS information but prefer
+      not to create raw requests. They can work by creating HTTP
+      requests other than real DNS queries.
     </t>
 
     <t>
       In this style of implementation DNS data is exchanged in other
       formats than wire format, like JSON 
-      <xref target="I-D.bortzmeyer-dns-json"/>, or XML 
+      <xref target="I-D.hoffman-dns-in-json"/>, or XML 
       <xref target="I-D.mohan-dns-query-xml"/>. There are also lots of
-      REST DNS API developed by DNS service providers.
+      REST DNS API developed by DNS or cloud service providers.
     </t>
 
     <t>
       Most of these APIs are developed in the scope of their own
       system with different specification. But a typical query is 
-      a client will requesting a special formatted URI. Usually there
-      is a HTTP(S) server listening to port 80/443, which  will parse
-      the request and create a DNS query or DNS operation command
-      towards the real DNS. Unlike wire-format DNS over HTTP(S), once
-      the HTTP(S) server receives the response, it create the response 
-      by putting DNS data into various structured formats like JSON,
-      XML, YAML, or even plain text.
+      a client will requesting a special formatted URI. This may be
+      via an HTTP POST command, or it may encode the contents of the
+      DNS query in the URI directly. Usually there is a HTTP(S) server
+      listening to port 80/443, which  will parse the request and
+      create a DNS query or DNS operation command towards the real
+      DNS. Unlike wire-format DNS over HTTP(S), once the HTTP(S)
+      server receives the response, it create the response by putting
+      DNS data into various structured formats like JSON, XML, YAML,
+      or even plain text.
     </t> 
 
     <t>
@@ -365,7 +372,7 @@
     </t>
 
     <t>
-      As with DNS over DNS Wire-format over HTTP, use of encryption is
+      As with DNS using DNS wire-format over HTTP, use of encryption is
       encouraged.
     </t>
     </section> <!-- "REST HTTP API" -->
@@ -376,7 +383,8 @@
     <t>
     Thanks to Jinmei Tatuya for review. Thanks to Robert Edmonds for
     pushing for encryption. Thanks to Mark Delany for raising the
-    issue of out-of-order responses.
+    issue of out-of-order responses. Thanks to Ted Hardie for
+    mentioning the idea of encoding the DNS query directly in the URI.
     </t>
   </section> <!-- Acknowledgments -->
 
@@ -385,10 +393,11 @@
   <back>
 
     <references title="References">
-      &RFC1035; &RFC3234; &RFC5246; &RFC5625; &RFC5966; &RFC7230;
-      &RFC7540;
-      &I-D.dprive-dns-over-tls; &I-D.bortzmeyer-dns-json;
-      &I-D.mohan-dns-query-xml; &I-D.ietf-dnsop-edns-client-subnet;
+      &RFC1035; &RFC3234; &RFC5625; &RFC5966; &RFC7230;
+      &RFC7413; &RFC7540; &RFC7858; &RFC7871;
+      &I-D.dprive-dns-over-tls;
+      &I-D.hoffman-dns-in-json;
+      &I-D.mohan-dns-query-xml;
 
      <reference anchor="DOTSE" target="http://www.iis.se/docs/Routertester_en.pdf">
           <front>
