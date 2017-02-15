@@ -13,6 +13,8 @@
 <!ENTITY RFC7230 SYSTEM "http://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.7230.xml">
 <!ENTITY RFC7231 SYSTEM "http://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.7231.xml">
 <!ENTITY RFC7540 SYSTEM "http://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.7540.xml">
+<!ENTITY RFC7626 SYSTEM "http://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.7626.xml">
+<!ENTITY RFC7858 SYSTEM "http://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.7858.xml">
 <!ENTITY I-D.bortzmeyer-dns-json SYSTEM "http://xml2rfc.ietf.org/public/rfc/bibxml3/reference.I-D.draft-bortzmeyer-dns-json-01.xml">
 <!ENTITY I-D.mohan-dns-query-xml SYSTEM "http://xml2rfc.ietf.org/public/rfc/bibxml3/reference.I-D.draft-mohan-dns-query-xml-00.xml">
 <!ENTITY I-D.ietf-dnsop-5966bis SYSTEM "http://xml2rfc.ietf.org/public/rfc/bibxml3/reference.I-D.draft-ietf-dnsop-5966bis-04.xml">
@@ -45,7 +47,7 @@
 <!-- end of list of popular I-D processing instructions -->
 <?rfc comments="no" ?>
 <?rfc inline="yes" ?>
-<rfc category="exp" docName="draft-ietf-dns-wireformat-http-00" ipr="trust200902">
+<rfc category="exp" docName="draft-ietf-dns-wireformat-http-01" ipr="trust200902">
 
   <front>
 
@@ -371,27 +373,27 @@
 
       </section> <!-- Header Fields -->
 
-
       <section title="Message Body">
 
-      <t>As mentioned, the message body is DNS wire-format data. It is worth mentioning 
-        that DNS messages sent over TCP connections is prefixed with 
-        a two-byte length field which gives the message length [section 4.2.2 in <xref target="RFC1035">RFC 1035</xref>], 
-        excluding the two-byte length field. This length field allows the low-level processing 
-        to assemble a complete message before beginning to parse it. In the context of HTTP, 
-        there is content-length header field [section 3.3.2 in <xref target="RFC7230"/>]in which the field-value
-        is the same with two bytes length field in DNS over TCP. </t>
+      <t>As mentioned, the message body is DNS wire-format data. DNS
+        messages sent over TCP connections is prefixed with a two-byte
+        length field which gives the message length [section 4.2.2 in
+        <xref target="RFC1035">RFC 1035</xref>], excluding the
+        two-byte length field. This length field allows the low-level
+        processing to assemble a complete message before beginning to
+        parse it.  But when HTTP is used, the HTTP protocol itself
+        keeps track of the length of the message, so there is no need
+        to transmit this separately.</t>
 
-      <t>Since this two-byte length field is redundant, when the
-         client proxy receives a DNS message over TCP, it MUST NOT
-         include the length field in the message sent to the server.
-         The length in the content-length header is only the size of
-         the DNS message itself, and MUST NOT include this two-byte
-         length header.
-      </t>
+      <t>Since the two-byte length field is redundant, when the
+         client proxy receives a DNS message over TCP or when the
+         server sends an answer for a TCP query, it MUST NOT include
+         the length field in the message sent. The length of the
+         message sent by HTTP is only the size of the DNS message
+         itself, and MUST NOT include this two-byte length header.</t>
 
-      </section> 
-      </section>
+      </section>  <!-- Message Body -->
+  </section> <!-- DNS-over-HTTP Message Format -->
 
   <section title="Security Considerations">
       <t>This protocol does not introduce any new security
@@ -431,6 +433,32 @@
     
     </section>
 
+    <section title="Privacy Considerations">
+      <t>DNS over HTTP involves sending DNS requests, so is subject to
+      most of the problems documented in <xref target="RFC7626">RFC
+      7626</xref>. In particular the resolver handling the request
+      sees the contents of every query and answer, as does any proxy
+      involved on either the client or server side.
+      </t>
+      <t>Use of TLS encryption will prevent attackers from  seeing
+      the plain DNS queries on the wire. However, the warnings about
+      privacy in <xref target="RFC7858">RFC 7858</xref> apply: "Even
+      with encrypted messages, a well-positioned party may be able to
+      glean certain details from an analysis of message timings and
+      sizes."
+      </t>
+      <t>If a server requires a client-side certificate or other
+      authentication, then this may allow an attacker to identify
+      which user is active and when, if they gain access to the server
+      logs.
+      </t>
+      <t>The use of DNS over HTTP may act as a strong signal to any
+      surviellers that the user is attempting to bypass local DNS
+      policy either to get different answers or hide their traffic.
+      Various techniques could be used to discover this, such as
+      observing web traffic without any corresponding DNS traffic.
+      </t>
+    </section> <!-- Privacy Considerations -->
 
     <section title="IANA considerations">
       <t>Registration for a new Media Type: dns-wireformat</t>
@@ -444,7 +472,8 @@
 
   <section title="Acknowledgments">
     <t>
-    Thanks to Bob Harold, Paul Hoffman, and Julian Reschke for review.
+    Thanks to Bob Harold, Paul Hoffman, Julian Reschke, and Erik Kline
+    for review.
     </t>
   </section> <!-- Acknowledgments -->
   
@@ -453,7 +482,8 @@
   <back>
 
     <references title="References">
-      &RFC1035; &RFC5246; &RFC5625;&RFC5785;&RFC7230; &RFC7231;&RFC7540;
+      &RFC1035; &RFC5246; &RFC5625;&RFC5785;&RFC7230;
+      &RFC7231;&RFC7540; &RFC7626; &RFC7858;
       &I-D.ietf-dnsop-5966bis;
       &I-D.bortzmeyer-dns-json;&I-D.mohan-dns-query-xml;
 

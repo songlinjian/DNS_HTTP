@@ -5,11 +5,11 @@
 Internet Engineering Task Force                                  S. Kerr
 Internet-Draft                                                   L. Song
 Intended status: Informational                                    R. Wan
-Expires: October 29, 2016                     Beijing Internet Institute
-                                                          April 27, 2016
+Expires: May 7, 2017                          Beijing Internet Institute
+                                                        November 3, 2016
 
 
-            A review of implementation DNS over port 80/443
+                    A review of DNS over port 80/443
                   draft-shane-review-dns-over-http-03
 
 Abstract
@@ -36,7 +36,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on October 29, 2016.
+   This Internet-Draft will expire on May 7, 2017.
 
 Copyright Notice
 
@@ -53,9 +53,9 @@ Copyright Notice
 
 
 
-Kerr, et al.            Expires October 29, 2016                [Page 1]
+Kerr, et al.               Expires May 7, 2017                  [Page 1]
 
-Internet-DrafA review of implementation DNS over port 80/443  April 2016
+Internet-Draft      A review of DNS over port 80/443       November 2016
 
 
    the Trust Legal Provisions and are provided without warranty as
@@ -86,13 +86,13 @@ Table of Contents
    o  Case 1: Firewalls or other middleboxes may interfere with normal
       DNS traffic [RFC3234] [RFC5625] [DOTSE] [SAC035].  In addition,
       some ISPs and hotels block external DNS and perform DNS rewriting
-      to send users to advertising pages, or may use IP addresses which
-      cause misleading geographic location for the user
-      [I-D.ietf-dnsop-edns-client-subnet].  Users may want DNSSEC
-      support which is not deployed locally in such a case, and so on.
+      to send users to advertising or other pages that they did intend,
+      or networks may use IP addresses which cause misleading geographic
+      location for the user [RFC7871].  Users may want DNSSEC support
+      which is not deployed locally in such a case, and so on.
 
    o  Case 2: Users may use DNS over TLS or HTTPS to protect privacy.
-      This also allows the client to authenticate the server.
+      This also allows the DNS client to authenticate the DNS server.
 
    o  Case 3: Developers may want a higher level DNS API.  Web
       developers may prefer different abstractions or familiar tools
@@ -101,21 +101,21 @@ Table of Contents
    This memo does not aim to develop standards or tools.  The purpose is
    to review various implementation options as a reference for
    developers.  However, it may be helpful for anyone hoping to develop
-   specifications for DNS over 80/443 in the future.
+   specifications or implementations for DNS over 80/443.
 
    Note that most of the implementations described in this memo are on
-   port 80/443 and combined with TCP/TLS/HTTP(S).  The main focus is
+   port 80/443 and combined with TCP/TLS/HTTP(S).  The main focus here
 
 
 
 
-Kerr, et al.            Expires October 29, 2016                [Page 2]
+Kerr, et al.               Expires May 7, 2017                  [Page 2]
 
-Internet-DrafA review of implementation DNS over port 80/443  April 2016
+Internet-Draft      A review of DNS over port 80/443       November 2016
 
 
-   between stub resolvers and recursive servers, and the discussion is
-   about the stub resolver to recursive server communication.
+   is between stub resolvers and recursive servers, and the discussion
+   is about the stub resolver to recursive server communication.
 
 2.  Different Implementations Approaches
 
@@ -127,13 +127,13 @@ Internet-DrafA review of implementation DNS over port 80/443  April 2016
    In this way, the whole protocol is the same as current DNS transport
    in TCP, except the transport port is moved to port 80 or 443.  The
    difference between port 80 and 443 is that the traffic of port 80 is
-   usually intercepted as HTTP traffic for purposes of deeper
-   inspection, while the traffic of port 443 is usually considered to be
-   encrypted, and typically ignored by middle-boxes.  One example where
-   DNS is transported through port 80/443 is one of the fallback cases
-   of NLnetLabs' DNSSEC trigger [dnssec-trigger].
+   often intercepted as HTTP traffic for purposes of deeper inspection,
+   while the traffic of port 443 is usually considered to be encrypted,
+   and typically ignored by middle-boxes.  One example where DNS is
+   transported through port 80/443 is one of the fallback cases of
+   NLnetLabs' DNSSEC trigger [dnssec-trigger].
 
-   Transporting DNS through port 80/443 is an easy implementation.
+   Transporting DNS through port 80/443 is easy to implement.
    Developers can simply run an existing DNS server and configure the
    DNS software to listen on ports 80/443.  The client can also apply
    this change without any significant changes.
@@ -146,35 +146,38 @@ Internet-DrafA review of implementation DNS over port 80/443  April 2016
 2.2.  DNS over TLS on port 443
 
    Another approach is DNS over TLS on port 443, which is also
-   implemented in DNSSEC trigger.  DNS over TLS is documented in
-   [I-D.ietf-dprive-dns-over-tls], which uses the well-known port 853.
-   Using port 443 to carry the traffic instead still serves the purpose
-   in use case 1, as some middle boxes may block traffic on the port
-   853.  [I-D.ietf-dprive-dns-over-tls] also discusses authentication
-   and privacy profiles.
+   implemented in DNSSEC trigger [dnssec-trigger].  DNS over TLS is
+   documented in [RFC7858], which uses the well-known port 853.  Using
+   port 443 to carry the traffic instead still serves the purpose in use
+   case 1, as some middle boxes may block traffic on the port 853.
+   [I-D.ietf-dprive-dns-over-tls] also discusses authentication and
+   privacy profiles.
 
    TLS provide many benefits for DNS.  First, it significantly reduces
-   the DNS conversation's vulnerability to being hijacked.  Second, it
-   prevents resolvers from becoming amplifiers of reflection attack.
-   Additionally, it provides privacy by encrypting the conversation
-   between client and server.
+   the DNS conversation's vulnerability to being hijacked.  Second, like
+   plain TCP or DNS Cookies, it prevents resolvers from being used in
+   amplification or reflection attacks.  Additionally, it provides
+   privacy by encrypting the conversation between client and server.
 
    One concern of DNS over TLS is its cost.  Compared to UDP, DNS-over-
    TCP requires an additional round-trip-time (RTT) of latency to
-   establish a TCP connection.  Use of TLS encryption algorithms adds an
+   establish a TCP connection (although TCP fast open [RFC7413] may
 
 
 
-Kerr, et al.            Expires October 29, 2016                [Page 3]
+Kerr, et al.               Expires May 7, 2017                  [Page 3]
 
-Internet-DrafA review of implementation DNS over port 80/443  April 2016
+Internet-Draft      A review of DNS over port 80/443       November 2016
 
 
-   additional RTT, and results in slightly higher CPU usage.  It should
-   also be considered that the DNS packet over TLS on a new port might
-   be dropped by some middle boxes.  Another concern of TLS is the
-   deployment difficulty when authenticating the server.  If servers are
-   authenticated, certificate management is required.
+   eliminate that in some cases).  Use of TLS encryption algorithms adds
+   an additional RTT, and results in slightly higher CPU usage.  Keeping
+   a session open may amortize the latency of extra RTT, but at the cost
+   of state on both client and resolver side.  Another concern is that
+   the DNS packet over TLS on a new port might be dropped by some middle
+   boxes.  Another concern of TLS is the deployment difficulty when
+   authenticating the server.  If servers are authenticated, certificate
+   management is required.
 
 2.3.  DNS Wire-format over HTTP(S)
 
@@ -183,7 +186,7 @@ Internet-DrafA review of implementation DNS over port 80/443  April 2016
    as HTTP(S) traffic.  It is quiet useful in use cases 1 & 2 described
    in the introduction.  This approach has the benefit that HTTP usually
    makes it through even the worst coffee shop or hotel room firewalls,
-   as this expected by Internet users.
+   as working web browsing is expected by Internet users.
 
    Using HTTP also benefits from HTTP's persistent TCP connection pool
    concept (see section 6.3 in [RFC7230]), which DNS on TCP port 53 does
@@ -215,16 +218,17 @@ Internet-DrafA review of implementation DNS over port 80/443  April 2016
    only true if some software is translating from the DNS protocol to
    DNS over HTTP, for example via a proxy.  Native implementations will
    of course not need this.)  There is an implementation of this
+
+
+
+Kerr, et al.               Expires May 7, 2017                  [Page 4]
+
+Internet-Draft      A review of DNS over port 80/443       November 2016
+
+
    methodology in the Go Programming Language (https://github.com/BII-
    Lab/DNSoverHTTPinGO) as well as C (https://github.com/BII-Lab/
    DNSoverHTTP), maintained by BII lab.
-
-
-
-Kerr, et al.            Expires October 29, 2016                [Page 4]
-
-Internet-DrafA review of implementation DNS over port 80/443  April 2016
-
 
    In addition to the benefits mentioned before, the HTTP header makes
    DNS wire-format over HTTP(S) easy to extend.  Compared to creating a
@@ -240,53 +244,56 @@ Internet-DrafA review of implementation DNS over port 80/443  April 2016
    unpacking uses CPU and may result in higher response time.  The DNS
    over HTTP messages also have a risk of being dropped by firewalls
    which intercepts HTTP packets.  And it should be noted that if HTTPS
-   is used, then all the discussion of TLS in previous section is also
-   applicable here.
+   is used, then all the discussion of the costs, benefits, and security
+   recommendations about TLS in previous section is also applicable
+   here.
 
 2.4.  REST HTTP API
 
    As mentioned in use case 3, one motivation of a REST HTTP API is for
-   web developers who need to get DNS information but cannot create raw
-   requests (for example JavaScript developers).  They can work by
-   creating HTTP requests other than real DNS queries.
+   web developers who need to get DNS information but prefer not to
+   create raw requests.  They can work by creating HTTP requests other
+   than real DNS queries.
 
    In this style of implementation DNS data is exchanged in other
-   formats than wire format, like JSON [I-D.bortzmeyer-dns-json], or XML
+   formats than wire format, like JSON [I-D.hoffman-dns-in-json], or XML
    [I-D.mohan-dns-query-xml].  There are also lots of REST DNS API
-   developed by DNS service providers.
+   developed by DNS or cloud service providers.
 
    Most of these APIs are developed in the scope of their own system
    with different specification.  But a typical query is a client will
-   requesting a special formatted URI.  Usually there is a HTTP(S)
-   server listening to port 80/443, which will parse the request and
-   create a DNS query or DNS operation command towards the real DNS.
-   Unlike wire-format DNS over HTTP(S), once the HTTP(S) server receives
-   the response, it create the response by putting DNS data into various
-   structured formats like JSON, XML, YAML, or even plain text.
+   requesting a special formatted URI.  This may be via an HTTP POST
+   command, or it may encode the contents of the DNS query in the URI
+   directly.  Usually there is a HTTP(S) server listening to port
+   80/443, which will parse the request and create a DNS query or DNS
+   operation command towards the real DNS.  Unlike wire-format DNS over
+   HTTP(S), once the HTTP(S) server receives the response, it create the
+   response by putting DNS data into various structured formats like
+   JSON, XML, YAML, or even plain text.
 
    However, such an approach may have issues, because it is not based on
    traditional DNS protocol.  So there is no guarantee of the protocol's
    completeness and correctness.  Support for DNSSEC might also be a
+
+
+
+Kerr, et al.               Expires May 7, 2017                  [Page 5]
+
+Internet-Draft      A review of DNS over port 80/443       November 2016
+
+
    problem because the response usually do not contain RR records with
    the answer, making it impossible for a client to validate the reply.
 
-   As with DNS over DNS Wire-format over HTTP, use of encryption is
+   As with DNS using DNS wire-format over HTTP, use of encryption is
    encouraged.
-
-
-
-
-
-Kerr, et al.            Expires October 29, 2016                [Page 5]
-
-Internet-DrafA review of implementation DNS over port 80/443  April 2016
-
 
 3.  Acknowledgments
 
    Thanks to Jinmei Tatuya for review.  Thanks to Robert Edmonds for
    pushing for encryption.  Thanks to Mark Delany for raising the issue
-   of out-of-order responses.
+   of out-of-order responses.  Thanks to Ted Hardie for mentioning the
+   idea of encoding the DNS query directly in the URI.
 
 4.  References
 
@@ -298,21 +305,15 @@ Internet-DrafA review of implementation DNS over port 80/443  April 2016
               Broadband Routers", February 2008,
               <http://www.iis.se/docs/Routertester_en.pdf>.
 
-   [I-D.bortzmeyer-dns-json]
-              Bortzmeyer, S., "JSON format to represent DNS data",
-              draft-bortzmeyer-dns-json-01 (work in progress), February
-              2013.
-
-   [I-D.ietf-dnsop-edns-client-subnet]
-              Contavalli, C., Gaast, W., tale, t., and W. Kumari,
-              "Client Subnet in DNS Queries", draft-ietf-dnsop-edns-
-              client-subnet-04 (work in progress), September 2015.
+   [I-D.hoffman-dns-in-json]
+              Hoffman, P., "Representing DNS Messages in JSON", draft-
+              hoffman-dns-in-json-10 (work in progress), October 2016.
 
    [I-D.ietf-dprive-dns-over-tls]
               Zi, Z., Zhu, L., Heidemann, J., Mankin, A., Wessels, D.,
-              and P. Hoffman, "DNS over TLS: Initiation and Performance
-              Considerations", draft-ietf-dprive-dns-over-tls-01 (work
-              in progress), October 2015.
+              and P. Hoffman, "Specification for DNS over TLS", draft-
+              ietf-dprive-dns-over-tls-07 (work in progress), March
+              2016.
 
    [I-D.mohan-dns-query-xml]
               Parthasarathy, M. and P. Vixie, "Representing DNS messages
@@ -332,16 +333,10 @@ Internet-DrafA review of implementation DNS over port 80/443  April 2016
 
 
 
-
-Kerr, et al.            Expires October 29, 2016                [Page 6]
+Kerr, et al.               Expires May 7, 2017                  [Page 6]
 
-Internet-DrafA review of implementation DNS over port 80/443  April 2016
+Internet-Draft      A review of DNS over port 80/443       November 2016
 
-
-   [RFC5246]  Dierks, T. and E. Rescorla, "The Transport Layer Security
-              (TLS) Protocol Version 1.2", RFC 5246,
-              DOI 10.17487/RFC5246, August 2008,
-              <http://www.rfc-editor.org/info/rfc5246>.
 
    [RFC5625]  Bellis, R., "DNS Proxy Implementation Guidelines",
               BCP 152, RFC 5625, DOI 10.17487/RFC5625, August 2009,
@@ -356,10 +351,24 @@ Internet-DrafA review of implementation DNS over port 80/443  April 2016
               RFC 7230, DOI 10.17487/RFC7230, June 2014,
               <http://www.rfc-editor.org/info/rfc7230>.
 
+   [RFC7413]  Cheng, Y., Chu, J., Radhakrishnan, S., and A. Jain, "TCP
+              Fast Open", RFC 7413, DOI 10.17487/RFC7413, December 2014,
+              <http://www.rfc-editor.org/info/rfc7413>.
+
    [RFC7540]  Belshe, M., Peon, R., and M. Thomson, Ed., "Hypertext
               Transfer Protocol Version 2 (HTTP/2)", RFC 7540,
               DOI 10.17487/RFC7540, May 2015,
               <http://www.rfc-editor.org/info/rfc7540>.
+
+   [RFC7858]  Hu, Z., Zhu, L., Heidemann, J., Mankin, A., Wessels, D.,
+              and P. Hoffman, "Specification for DNS over Transport
+              Layer Security (TLS)", RFC 7858, DOI 10.17487/RFC7858, May
+              2016, <http://www.rfc-editor.org/info/rfc7858>.
+
+   [RFC7871]  Contavalli, C., van der Gaast, W., Lawrence, D., and W.
+              Kumari, "Client Subnet in DNS Queries", RFC 7871,
+              DOI 10.17487/RFC7871, May 2016,
+              <http://www.rfc-editor.org/info/rfc7871>.
 
    [SAC035]   ICANN Security and Stability Advisory Committee, "DNSSEC
               Impact on Broadband Routers and Firewalls", 2008.
@@ -376,6 +385,15 @@ Authors' Addresses
    URI:   http://www.biigroup.com/
 
 
+
+
+
+
+Kerr, et al.               Expires May 7, 2017                  [Page 7]
+
+Internet-Draft      A review of DNS over port 80/443       November 2016
+
+
    Linjian Song
    Beijing Internet Institute
    2508 Room, 25th Floor, Tower A, Time Fortune
@@ -384,14 +402,6 @@ Authors' Addresses
 
    Email: songlinjian@gmail.com
    URI:   http://www.biigroup.com/
-
-
-
-
-
-Kerr, et al.            Expires October 29, 2016                [Page 7]
-
-Internet-DrafA review of implementation DNS over port 80/443  April 2016
 
 
    Runxia Wan
@@ -435,14 +445,4 @@ Internet-DrafA review of implementation DNS over port 80/443  April 2016
 
 
 
-
-
-
-
-
-
-
-
-
-
-Kerr, et al.            Expires October 29, 2016                [Page 8]
+Kerr, et al.               Expires May 7, 2017                  [Page 8]
